@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="live_status_unavailable">HiLight indisponible</string>
+    <string name="live_status_testing">Test · %1$s</string>
+    <string name="live_status_on">HiLight · %1$s</string>
+    <string name="live_status_system">HiLight est au système</string>
+
+    <string name="live_hint_no_array">%1$s n\'a pas d\'array HiLight : la fonctionnalité est réservée aux modèles Pro.</string>
+    <string name="live_hint_no_renderer">Connectez un renderer dans Config pour piloter l\'array.</string>
+    <string name="live_hint_look">Retournez le téléphone pour le voir en vrai.</string>
+    <string name="live_hint_take_over">Prenez la main sur l\'array avec l\'interrupteur ci-dessous.</string>
+
+    <string name="live_toggle_driving">HiLight piloté</string>
+    <string name="live_toggle_system">HiLight est au système</string>
+
+    <string name="live_suppressed_quiet_hours">Heures calmes : l\'array reste éteint jusqu\'à la fin de votre plage.</string>
+    <string name="live_suppressed_low_battery">La batterie est faible, l\'array est donc en pause. La charge le réactive.</string>
+    <string name="live_suppressed_power_saver">L\'économiseur de batterie est actif, l\'array est donc en pause.</string>
+    <string name="live_suppressed_screen_on">Réglé pour ne s\'allumer que lorsque l\'écran est éteint.</string>
+
+    <string name="live_safety_resting">En repos pour protéger les LEDs, qui ont été trop allumées récemment.</string>
+    <string name="live_safety_timed_out">Extinction automatique atteinte. Changez de style ou basculez l\'interrupteur pour rallumer.</string>
+    <string name="live_safety_countdown">Extinction automatique dans %1$d s · quota utilisé %2$d %%</string>
+
+    <string name="live_renderer_pid">pid du renderer %1$d · %2$s</string>
+    <string name="live_session_open">session ouverte</string>
+    <string name="live_session_closed">session fermée</string>
+
+    <string name="live_tests_title">Essayer un effet</string>
+    <string name="live_tests_caption">Se déclenche pendant quatre secondes sur les vraies LEDs, puis revient à votre style.</string>
+    <string name="live_test_random">Aléatoire</string>
+
+    <string name="live_rules_title">Règles d\'applis</string>
+    <string name="live_rules_on_count">%1$d actives</string>
+    <string name="live_rules_empty">Rien pour l\'instant. Ajoutez des couleurs par appli dans l\'onglet Applis.</string>
+    <string name="live_rule_summary">%1$s · %2$s</string>
+    <string name="live_rule_random">aléatoire</string>
+    <string name="live_rule_notify">notification</string>
+    <string name="live_rule_in_app">appli ouverte</string>
+
+    <string name="tile_label">HiLight</string>
+    <string name="tile_no_renderer">Aucun renderer</string>
+    <string name="tile_off">Éteint</string>
+    <string name="tile_resting">En repos</string>
+    <string name="tile_timed_out">Expiré</string>
+
+    <string name="widget_colour">Couleur</string>
+    <string name="widget_saturation">Saturation</string>
+    <string name="widget_intensity">Intensité</string>
+    <string name="widget_percent">%1$d %%</string>
+
+</resources>

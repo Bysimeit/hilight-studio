@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Confidentialité : aucun texte de message ne doit apparaître dans ces chaînes, ni dans l'export
+    que construit l'inspecteur. Il est fait pour être collé dans un rapport de bug.
+-->
+<resources>
+
+    <string name="inspector_title">Inspecteur de notifications</string>
+    <string name="inspector_copy_json">Copier en JSON</string>
+    <string name="inspector_send">Envoyer</string>
+    <string name="inspector_privacy_note">Noms, identifiants et structure uniquement. Le texte des messages n\'est jamais affiché ici ni exporté.</string>
+    <string name="inspector_seen_one">La dernière notification vue par HiLight.</string>
+    <string name="inspector_seen_many">Les %1$d dernières notifications vues par HiLight, de la plus récente à la plus ancienne.</string>
+    <string name="inspector_export_note">Inspecteur de notifications HiLight, de la plus récente à la plus ancienne. %1$s</string>
+    <string name="inspector_copied_toast">Copié en JSON</string>
+    <string name="inspector_share_chooser_title">Envoyer le contenu de l\'inspecteur</string>
+    <string name="inspector_empty_title">Rien vu pour l\'instant</string>
+    <string name="inspector_empty_body">Les notifications apparaissent ici à mesure qu\'elles arrivent : laissez cet écran ouvert, ou rouvrez-le une fois qu\'une notification est arrivée.</string>
+    <string name="inspector_empty_access">Rien n\'est vu sans l\'accès aux notifications. La liste n\'est gardée qu\'en mémoire : elle se vide dès que HiLight s\'arrête.</string>
+
+    <string name="inspector_pill_read_failed">lecture impossible</string>
+    <string name="inspector_pill_name_found">nom trouvé</string>
+    <string name="inspector_pill_no_name">aucun nom</string>
+
+    <string name="inspector_field_shortcut_id">Identifiant de raccourci : %1$s</string>
+    <string name="inspector_field_sender">Expéditeur : %1$s</string>
+    <string name="inspector_field_conversation">Conversation : %1$s</string>
+    <string name="inspector_field_title">Titre : %1$s</string>
+    <string name="inspector_field_messaging_style_detected">MessagingStyle : détecté</string>
+    <string name="inspector_field_messaging_style_not_detected">MessagingStyle : non détecté</string>
+    <string name="inspector_read_failed_note">Cette notification n\'a pas pu être lue : les champs ci-dessous sont donc manquants, et non absents. C\'est un défaut qui mérite d\'être signalé en joignant ce contenu.</string>
+    <string name="inspector_group_summary">Résumé de groupe, que HiLight ignore pour qu\'une conversation ne se déclenche pas deux fois.</string>
+    <string name="inspector_no_name_note">Cette appli n\'a fourni aucun nom exploitable : aucune règle par conversation ne peut en être tirée. Une règle pour toute l\'appli fonctionne quand même.</string>
+
+    <string name="service_watcher_channel_name">Surveillance des applis HiLight</string>
+    <string name="service_watcher_title">HiLight Studio</string>
+    <string name="service_watcher_text">Surveille les applis ayant des règles lumineuses</string>
+
+</resources>

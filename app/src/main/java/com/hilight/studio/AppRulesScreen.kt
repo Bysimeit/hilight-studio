@@ -379,11 +379,11 @@ private fun CallCard(
                 FilledTonalButton(
                     onClick = onEdit,
                     modifier = Modifier.weight(1f),
-                ) { ButtonLabel("Edit") }
+                ) { ButtonLabel(stringResource(R.string.common_edit)) }
                 FilledTonalButton(
                     onClick = onTest,
                     modifier = Modifier.weight(1f),
-                ) { ButtonLabel("Test") }
+                ) { ButtonLabel(stringResource(R.string.common_test)) }
             }
         }
     }

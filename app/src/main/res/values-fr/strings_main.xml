@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="main_connected_pill">%1$d LEDs · %2$s</string>
+    <string name="main_not_connected">non connecté</string>
+
+    <string name="hero_description">%1$s, barre photo avec l\'array HiLight. %2$s</string>
+    <string name="hero_no_array">Ce modèle n\'a pas d\'array HiLight.</string>
+    <string name="hero_array_off">L\'array est éteint.</string>
+    <string name="hero_showing">Affiche %1$s.</string>
+    <string name="hero_strip_preview">Aperçu de %1$s sur les huit LEDs</string>
+    <string name="hero_strip_off">Aperçu éteint : %1$s</string>
+
+</resources>
