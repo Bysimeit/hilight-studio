@@ -94,4 +94,64 @@ public final class OutputGateTest {
         assertEquals(0, gate.alertElapsed(5_000));
         assertEquals(2_500, gate.alertElapsed(7_500));
     }
+
+    @Test
+    public void anOpenEndedAlertIsHeldUntilItIsCleared() {
+        OutputGate gate = new OutputGate();
+        gate.startAlert(0, 0);
+
+        assertTrue(gate.isAlertOpenEnded());
+        assertEquals(OutputGate.Layer.ALERT, gate.next(0));
+        assertEquals(OutputGate.Layer.ALERT, gate.next(TIMEOUT + 1));
+        assertEquals(OutputGate.Layer.ALERT, gate.next(10 * 60_000));
+    }
+
+    @Test
+    public void anOpenEndedAlertOutranksAnExpiringAmbientWindow() {
+        OutputGate gate = new OutputGate();
+        gate.armAmbient(0, TIMEOUT);
+        gate.startAlert(0, 0);
+
+        assertEquals(OutputGate.Layer.ALERT, gate.next(10_000));
+        assertEquals(OutputGate.Layer.ALERT, gate.next(TIMEOUT + 15_000));
+    }
+
+    @Test
+    public void clearingAnOpenEndedAlertHandsTheArrayBack() {
+        OutputGate gate = new OutputGate();
+        gate.startAlert(0, 0);
+        assertEquals(OutputGate.Layer.ALERT, gate.next(TIMEOUT + 30_000));
+
+        gate.clearAlert();
+
+        assertFalse(gate.isAlertHeld());
+        assertFalse(gate.isAlertOpenEnded());
+        assertEquals(OutputGate.Layer.BLANK, gate.next(TIMEOUT + 30_001));
+        assertEquals(OutputGate.Layer.IDLE, gate.next(TIMEOUT + 30_034));
+    }
+
+    @Test
+    public void clearingAnOpenEndedAlertFallsBackToAStillOpenWindow() {
+        OutputGate gate = new OutputGate();
+        gate.armAmbient(0, TIMEOUT);
+        gate.startAlert(0, 0);
+        assertEquals(OutputGate.Layer.ALERT, gate.next(5_000));
+
+        gate.clearAlert();
+
+        assertEquals(OutputGate.Layer.AMBIENT, gate.next(6_000));
+    }
+
+    @Test
+    public void aTimedAlertReplacesAnOpenEndedOne() {
+        OutputGate gate = new OutputGate();
+        gate.startAlert(0, 0);
+        assertTrue(gate.isAlertOpenEnded());
+
+        gate.startAlert(1_000, 10_000);
+
+        assertFalse(gate.isAlertOpenEnded());
+        assertEquals(OutputGate.Layer.ALERT, gate.next(10_999));
+        assertEquals(OutputGate.Layer.BLANK, gate.next(11_000));
+    }
 }

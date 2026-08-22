@@ -2,6 +2,7 @@ package com.hilight.studio
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -41,6 +42,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -57,15 +59,28 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private data class InstalledApp(val pkg: String, val label: String, val info: ApplicationInfo?)
 
 @Composable
 fun AppRulesScreen(store: Store) {
+    val ctx = LocalContext.current
     val rules by store.rules.collectAsStateWithLifecycle()
+    val enabled by store.enabled.collectAsStateWithLifecycle()
     var picking by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<AppRule?>(null) }
+    var usageMissing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(rules) {
+        while (true) {
+            val missing = ForegroundWatcher.needsUsageAccess(ctx, rules)
+            if (!missing && usageMissing) store.syncWatcher()
+            usageMissing = missing
+            delay(1500)
+        }
+    }
 
     PixelCard(tone = 2) {
         SectionTitle("Per-app rules")
@@ -74,6 +89,27 @@ fun AppRulesScreen(store: Store) {
             Icon(Icons.Rounded.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             ButtonLabel("Add app rule")
+        }
+    }
+
+    if (usageMissing) {
+        PixelCard {
+            SectionTitle("Usage access needed", trailing = { LivePill("needed", ok = false) })
+            Caption(
+                "\"While open\" rules stay dark until HiLight can see which app is in front. " +
+                    "Grant usage access to HiLight Studio, then come back."
+            )
+            FilledTonalButton(
+                onClick = { ctx.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) },
+                modifier = Modifier.fillMaxWidth(),
+            ) { ButtonLabel("Open usage access") }
+        }
+    }
+
+    if (!enabled && rules.any { it.enabled }) {
+        PixelCard {
+            SectionTitle("HiLight is off", trailing = { LivePill("off", ok = false) })
+            Caption("Rules only run while HiLight is on. Turn it on from the Live tab.")
         }
     }
 

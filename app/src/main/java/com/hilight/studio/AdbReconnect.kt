@@ -22,7 +22,10 @@ class BootReceiver : BroadcastReceiver() {
         when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED,
-            -> AdbReconnectService.start(context)
+            -> {
+                AdbReconnectService.start(context)
+                Store.get(context).syncWatcher()
+            }
         }
     }
 }
