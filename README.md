@@ -4,9 +4,13 @@
 
 Control the eight-LED HiLight array on Pixel 11 Pro devices.
 
-[![Android checks](https://github.com/DhananjayBhosale/hilight-studio/actions/workflows/android.yml/badge.svg)](https://github.com/DhananjayBhosale/hilight-studio/actions/workflows/android.yml)
-[![Latest release](https://img.shields.io/github/v/release/DhananjayBhosale/hilight-studio?include_prereleases&label=release)](https://github.com/DhananjayBhosale/hilight-studio/releases)
+[![Android checks](https://github.com/Bysimeit/hilight-studio/actions/workflows/android.yml/badge.svg)](https://github.com/Bysimeit/hilight-studio/actions/workflows/android.yml)
+[![Latest release](https://img.shields.io/github/v/release/Bysimeit/hilight-studio?include_prereleases&label=release)](https://github.com/Bysimeit/hilight-studio/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2f81f7.svg)](LICENSE)
+
+> [!NOTE]
+> A fork of [DhananjayBhosale/hilight-studio](https://github.com/DhananjayBhosale/hilight-studio),
+> adding on-phone setup (no computer and no Shizuku), call rules.
 
 > [!IMPORTANT]
 > HiLight Studio is experimental and supports only the Pixel 11 Pro, Pixel 11 Pro XL, and Pixel 11 Pro Fold on Android 17 (API 37). It is not affiliated with or endorsed by Google.
@@ -23,8 +27,9 @@ Control the eight-LED HiLight array on Pixel 11 Pro devices.
 - Saved presets with import and export
 - Wallpaper-derived colours and a Quick Settings tile
 - Quiet hours, Do Not Disturb, Battery Saver, and low-battery controls
+- Call rules: one look while the phone rings, another once the call connects
 - Set up entirely on the phone: no computer, no companion app, no root
-- English and Japanese, selectable per app from Android's own language settings
+- English, French and Japanese, selectable per app from Android's own language settings
 
 ## Screenshots
 
@@ -43,7 +48,7 @@ Control the eight-LED HiLight array on Pixel 11 Pro devices.
 
 ## Install
 
-1. Download the signed APK from the [latest GitHub prerelease](https://github.com/DhananjayBhosale/hilight-studio/releases).
+1. Download the signed APK from the [latest GitHub prerelease](https://github.com/Bysimeit/hilight-studio/releases).
 2. Open it on the phone and install it. Play Protect may warn about a sideloaded app that uses
    notification access; choose to install anyway.
 
@@ -152,7 +157,7 @@ Requirements:
 - Android Studio or a command-line Android SDK installation
 
 ```bash
-git clone https://github.com/DhananjayBhosale/hilight-studio.git
+git clone https://github.com/Bysimeit/hilight-studio.git
 cd hilight-studio
 ./gradlew :app:testDebugUnitTest :app:build :app:lint
 ```
