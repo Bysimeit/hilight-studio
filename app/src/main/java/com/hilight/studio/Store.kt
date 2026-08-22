@@ -86,6 +86,7 @@ class Store private constructor(private val app: Context) {
     val activeTransport: StateFlow<Transport> = _activeTransport.asStateFlow()
 
     private var foregroundOverride: Pair<String, JSONObject>? = null
+    private var callOverride: Pair<String, JSONObject>? = null
 
     private var activeAlert: JSONObject? = null
     private var alertExpiry: Runnable? = null
@@ -136,7 +137,10 @@ class Store private constructor(private val app: Context) {
         main.post { syncWatcher() }
     }
 
-    fun syncWatcher() = ForegroundWatcher.syncRunning(app, _rules.value, _enabled.value)
+    fun syncWatcher() {
+        LiveTriggers.sync(app, _rules.value, _enabled.value)
+        RuleWatcher.syncRunning(app, _rules.value, _enabled.value)
+    }
 
     private fun backend(): Backend = when (_transport.value) {
         Transport.SHIZUKU -> shizuku
@@ -292,6 +296,29 @@ class Store private constructor(private val app: Context) {
             }.getOrNull()
         } ?: emptyList()
 
+    fun callRule(trigger: Trigger): AppRule? =
+        _rules.value.firstOrNull { it.enabled && it.trigger == trigger }
+
+    fun setCallOverride(rule: AppRule?) {
+        if (rule == null) {
+            if (callOverride == null) return
+            callOverride = null
+            pushCurrent(arm = false)
+            return
+        }
+        if (callOverride?.first == rule.pkg) return
+        val color = if (rule.randomColor) randomColor() else rule.color
+        callOverride = rule.pkg to Bridge.alertJson(
+            id = Bridge.nextAlertId(),
+            pattern = rule.pattern,
+            color = color,
+            durationMs = rule.durationMs,
+            speedMs = rule.speedMs,
+            brightness = rule.brightness,
+        )
+        pushCurrent(arm = false)
+    }
+
     fun ruleFor(pkg: String, trigger: Trigger): AppRule? {
         val enabled = _rules.value.filter { it.enabled && it.trigger == trigger }
         return enabled.firstOrNull { it.pkg == pkg }
@@ -299,7 +326,7 @@ class Store private constructor(private val app: Context) {
     }
 
     fun pushCurrent(arm: Boolean = true) =
-        send(_enabled.value, activeAlert ?: foregroundOverride?.second, arm)
+        send(_enabled.value, activeAlert ?: callOverride?.second ?: foregroundOverride?.second, arm)
 
     fun fireAlert(rule: AppRule) {
         if (!_enabled.value) return

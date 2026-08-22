@@ -1,12 +1,25 @@
 package com.hilight.studio
 
+import android.content.ComponentName
+import android.content.Context
 import android.os.PowerManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import androidx.core.app.NotificationManagerCompat
 
 class NotificationTrigger : NotificationListenerService() {
     private val store by lazy { Store.get(this) }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        Store.get(this).syncWatcher()
+    }
+
+    override fun onListenerDisconnected() {
+        LiveTriggers.stop()
+        super.onListenerDisconnected()
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         Log.d(TAG, "posted by ${sbn.packageName}")
@@ -45,7 +58,20 @@ class NotificationTrigger : NotificationListenerService() {
     private fun screenOn(): Boolean =
         getSystemService(PowerManager::class.java)?.isInteractive ?: true
 
-    private companion object {
-        const val TAG = "HiLightNotif"
+    companion object {
+        private const val TAG = "HiLightNotif"
+
+        fun hasAccess(ctx: Context): Boolean =
+            NotificationManagerCompat.getEnabledListenerPackages(ctx).contains(ctx.packageName)
+
+        fun needsAccess(ctx: Context, rules: List<AppRule>): Boolean =
+            rules.any { it.enabled && it.trigger == Trigger.NOTIFICATION } && !hasAccess(ctx)
+
+        fun nudge(ctx: Context) {
+            if (!hasAccess(ctx)) return
+            runCatching {
+                requestRebind(ComponentName(ctx, NotificationTrigger::class.java))
+            }.onFailure { Log.w(TAG, "rebind request failed", it) }
+        }
     }
 }

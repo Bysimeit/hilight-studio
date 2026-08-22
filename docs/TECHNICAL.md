@@ -195,4 +195,27 @@ attribute either per-LED, so these figures are conservative by design rather tha
   in `LightsService` was not reverse-engineered.
 - Deep sleep suspends the CPU, so animations freeze at the last frame until the device wakes. Static
   colours are unaffected.
+- The frame period is derived from the slowest light's `getMinUpdatePeriodMillis()` plus a small
+  margin (33 ms + 5 ms on the launch devices), and the loop schedules at a fixed rate rather than
+  sleeping a fixed delay after each frame. Pushing at or below the advertised minimum lets the
+  per-light rate limiter drop updates unevenly across the eight lights, which reads as the array
+  animating out of step.
+- The array is blanked over several frames before the session is handed back, not one. The lights
+  are written in sequence and each rate-limits independently, so a single black frame can be
+  dropped for one light, which then stays lit at the last colour of the alert once the renderer
+  has released the array.
+- The call rules follow the audio mode, not telephony call state, so they need no permission and
+  cover VoIP as well as cellular. `MODE_RINGTONE` drives the incoming-call rule and
+  `MODE_IN_CALL` / `MODE_IN_COMMUNICATION` the connected one, so answering swaps one look for the
+  other without going dark. They hold for the length of the call state and outrank a "while open"
+  rule, but yield to a notification flash. Incoming VoIP calls usually ring through a notification
+  rather than the ringtone mode, so those light through the app's own notification rule.
+- The phone has its own HiLight animation for calls, and it is *not* fully suppressed by holding a
+  session: at equal priority the system's frames and ours interleave, which reads as two animations
+  fighting over the array. Raising the session priority above the system's settles it; the
+  alternative is turning the phone's own HiLight off in Settings. Confirmed on a Pixel 11 Pro —
+  with the system feature disabled, our call rules render cleanly.
+- A call rule set to hold for the whole call keeps the array lit for the call's full length, which
+  a long call will spend the duty budget on. The Apps tab surfaces the resulting resting state; the
+  per-rule duration is the way to stay inside the budget.
 - Notification rules ignore ongoing notifications (media, progress) to avoid constant retriggering.

@@ -27,7 +27,7 @@ enum class Pattern(
     }
 }
 
-enum class Trigger { NOTIFICATION, FOREGROUND }
+enum class Trigger { NOTIFICATION, FOREGROUND, RINGING, CALL }
 
 data class Ambient(
     val pattern: Pattern = Pattern.OFF,
@@ -113,7 +113,9 @@ data class AppRule(
 
     val keyword: String = "",
 ) {
-    val isCatchAll: Boolean get() = pkg == ANY_APP
+    val isCall: Boolean get() = trigger == Trigger.RINGING || trigger == Trigger.CALL
+
+    val isCatchAll: Boolean get() = pkg == ANY_APP && !isCall
 
     fun toPrefsJson(): JSONObject = JSONObject().apply {
         put("pkg", pkg)
@@ -132,6 +134,30 @@ data class AppRule(
 
     companion object {
         const val ANY_APP = "*"
+        const val CALL_STATE = "@call"
+        const val RINGING_STATE = "@ringing"
+
+        fun incomingCall() = AppRule(
+            pkg = RINGING_STATE,
+            label = "Incoming call",
+            enabled = false,
+            trigger = Trigger.RINGING,
+            pattern = Pattern.PULSE,
+            color = 0xFF00E676.toInt(),
+            durationMs = 0,
+            speedMs = 900,
+        )
+
+        fun onCall() = AppRule(
+            pkg = CALL_STATE,
+            label = "On a call",
+            enabled = false,
+            trigger = Trigger.CALL,
+            pattern = Pattern.BREATHE,
+            color = 0xFF00E5FF.toInt(),
+            durationMs = 0,
+            speedMs = 2600,
+        )
 
         fun fromJson(o: JSONObject) = AppRule(
             pkg = o.getString("pkg"),

@@ -5,6 +5,8 @@ import org.json.JSONObject;
 public final class Engine {
     public static final long FRAME_MS = SafetyGuard.FRAME_MS;
 
+    public static final long FRAME_HEADROOM_MS = 5;
+
     public static final long ALERT_MAX_MS = 60_000;
     public static final long DEFAULT_AMBIENT_TIMEOUT_MS = 30_000;
 
@@ -17,7 +19,7 @@ public final class Engine {
 
     private final LightsBackend lights = new LightsBackend();
     private final Renderer renderer = new Renderer();
-    private final SafetyGuard safety = new SafetyGuard();
+    private SafetyGuard safety = new SafetyGuard();
     private final OutputGate gate = new OutputGate();
     private final Object lock = new Object();
 
@@ -31,10 +33,15 @@ public final class Engine {
 
     private double dim = 1.0;
     private long ambientTimeoutMs = DEFAULT_AMBIENT_TIMEOUT_MS;
+    private volatile long framePeriodMs = FRAME_MS;
 
     public void start() throws Exception {
         lights.connect();
-        Log.i("connected: " + lights.ledCount() + " HiLight LEDs");
+        framePeriodMs = Math.max(FRAME_MS, lights.minUpdatePeriodMs() + FRAME_HEADROOM_MS);
+        safety = new SafetyGuard(
+                framePeriodMs, DUTY_WINDOW_MS, MAX_DUTY, TAPER_AFTER_MS, TAPER_RAMP_MS, TAPER_FLOOR);
+        Log.i("connected: " + lights.ledCount() + " HiLight LEDs"
+                + " (min update " + lights.minUpdatePeriodMs() + "ms, driving at " + framePeriodMs + "ms)");
         running = true;
         thread = new Thread(this::loop, "hilight-render");
         thread.setDaemon(false);
@@ -112,6 +119,7 @@ public final class Engine {
                 o.put("alertOpenEnded", gate.isAlertOpenEnded());
                 o.put("resting", safety.isResting());
                 o.put("dutyPct", safety.dutyPercent());
+                o.put("framePeriodMs", framePeriodMs);
                 o.put("version", 1);
             }
         } catch (Exception ignored) {
@@ -120,10 +128,17 @@ public final class Engine {
     }
 
     private void loop() {
+        long due = System.currentTimeMillis();
         while (running) {
             try {
                 tick();
-                Thread.sleep(FRAME_MS);
+                due += framePeriodMs;
+                long wait = due - System.currentTimeMillis();
+                if (wait < 1) {
+                    wait = 1;
+                    due = System.currentTimeMillis();
+                }
+                Thread.sleep(wait);
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {
@@ -133,6 +148,7 @@ public final class Engine {
                 } catch (InterruptedException e) {
                     return;
                 }
+                due = System.currentTimeMillis();
             }
         }
     }
@@ -172,8 +188,10 @@ public final class Engine {
                     break;
                 case BLANK:
 
-                    if (lights.isSessionOpen()) lights.push(protect(new int[]{0}, now));
-                    release("nothing left to show — released HiLight to the system");
+                    if (lights.isSessionOpen()) lights.push(protect(BLANK, now));
+                    if (gate.isBlankingDone()) {
+                        release("nothing left to show — released HiLight to the system");
+                    }
                     return;
                 default:
                     noteDark(now);
@@ -207,5 +225,5 @@ public final class Engine {
         return System.currentTimeMillis();
     }
 
-    private static final int[] BLANK = {0};
+    private static final int[] BLANK = {0xFF000000};
 }

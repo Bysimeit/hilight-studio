@@ -1,6 +1,8 @@
 package com.hilight.core;
 
 final class OutputGate {
+    static final int BLANK_FRAMES = 3;
+
     enum Layer {
         ALERT,
 
@@ -19,6 +21,7 @@ final class OutputGate {
     private long ambientDeadline;
 
     private boolean blanked;
+    private int blankFramesLeft = BLANK_FRAMES;
 
     void startAlert(long now, long durationMs) {
         alertHeld = true;
@@ -32,11 +35,13 @@ final class OutputGate {
         alertHeld = false;
         alertOpenEnded = false;
         blanked = false;
+        blankFramesLeft = BLANK_FRAMES;
     }
 
     void armAmbient(long now, long timeoutMs) {
         ambientDeadline = now + timeoutMs;
         blanked = false;
+        blankFramesLeft = BLANK_FRAMES;
     }
 
     boolean isAlertHeld() {
@@ -59,6 +64,10 @@ final class OutputGate {
         return blanked;
     }
 
+    boolean isBlankingDone() {
+        return blanked;
+    }
+
     Layer next(long now) {
         if (alertHeld) {
             if (alertOpenEnded || now < alertEnd) return Layer.ALERT;
@@ -66,7 +75,7 @@ final class OutputGate {
         }
         if (now > ambientDeadline) {
             if (blanked) return Layer.IDLE;
-            blanked = true;
+            if (--blankFramesLeft <= 0) blanked = true;
             return Layer.BLANK;
         }
         return Layer.AMBIENT;
