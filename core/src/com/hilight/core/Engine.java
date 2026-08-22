@@ -80,11 +80,12 @@ public final class Engine {
                     alert = a;
                     long asked = a.optLong("durationMs", 4000);
 
-                    long dur = asked <= 0 ? ambientTimeoutMs : Math.min(asked, ALERT_MAX_MS);
+                    long dur = asked <= 0 ? 0 : Math.min(asked, ALERT_MAX_MS);
                     gate.startAlert(System.currentTimeMillis(), dur);
                     renderer.reset();
-                    Log.i("alert " + id + " " + a.optString("pattern", "pulse") + " for " + dur + "ms"
-                            + (dur != asked ? " (asked " + asked + ", capped)" : ""));
+                    Log.i("alert " + id + " " + a.optString("pattern", "pulse")
+                            + (dur <= 0 ? " held until cleared" : " for " + dur + "ms")
+                            + (dur > 0 && dur != asked ? " (asked " + asked + ", capped)" : ""));
                 }
             }
         }
@@ -107,6 +108,8 @@ public final class Engine {
                 o.put("dim", dim);
                 o.put("ambientRemainingMs", gate.ambientRemainingMs(System.currentTimeMillis()));
                 o.put("ambientHeld", gate.isAmbientHeld());
+                o.put("alertHeld", gate.isAlertHeld());
+                o.put("alertOpenEnded", gate.isAlertOpenEnded());
                 o.put("resting", safety.isResting());
                 o.put("dutyPct", safety.dutyPercent());
                 o.put("version", 1);

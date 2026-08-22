@@ -73,13 +73,17 @@ fun SetupScreen(store: Store) {
     val quietDimPct by store.quietDimPct.collectAsStateWithLifecycle()
     val screenOffOnly by store.screenOffOnly.collectAsStateWithLifecycle()
 
+    val rules by store.rules.collectAsStateWithLifecycle()
     var notifAccess by remember { mutableStateOf(hasNotificationAccess(ctx)) }
     var usageAccess by remember { mutableStateOf(ForegroundWatcher.hasUsageAccess(ctx)) }
+    val usageNeeded = rules.any { it.enabled && it.trigger == Trigger.FOREGROUND }
 
     LaunchedEffect(Unit) {
         while (true) {
             notifAccess = hasNotificationAccess(ctx)
-            usageAccess = ForegroundWatcher.hasUsageAccess(ctx)
+            val access = ForegroundWatcher.hasUsageAccess(ctx)
+            if (access && !usageAccess) store.syncWatcher()
+            usageAccess = access
             store.shizuku.refresh()
             AdbAccess.refresh(ctx)
             delay(1500)
@@ -192,9 +196,18 @@ fun SetupScreen(store: Store) {
     PixelCard {
         SectionTitle(
             "Usage access",
-            trailing = { LivePill(if (usageAccess) "granted" else "optional", usageAccess) },
+            trailing = {
+                LivePill(
+                    when {
+                        usageAccess -> "granted"
+                        usageNeeded -> "needed"
+                        else -> "optional"
+                    },
+                    usageAccess,
+                )
+            },
         )
-        Caption("Only for \"while open\" rules.")
+        Caption("Required by \"while open\" rules; nothing else uses it.")
         FilledTonalButton(onClick = { ctx.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }) {
             ButtonLabel("Open usage access")
         }

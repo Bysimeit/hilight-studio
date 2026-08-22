@@ -132,7 +132,11 @@ class Store private constructor(private val app: Context) {
                 HiLightTile.refresh(app)
             }
         }
+
+        main.post { syncWatcher() }
     }
+
+    fun syncWatcher() = ForegroundWatcher.syncRunning(app, _rules.value, _enabled.value)
 
     private fun backend(): Backend = when (_transport.value) {
         Transport.SHIZUKU -> shizuku
@@ -153,6 +157,7 @@ class Store private constructor(private val app: Context) {
         prefs.edit().putBoolean("enabled", v).apply()
         pushCurrent()
         HiLightTile.refresh(app)
+        syncWatcher()
     }
 
     fun setDynamicColor(v: Boolean) {
@@ -232,13 +237,13 @@ class Store private constructor(private val app: Context) {
     fun upsertRule(rule: AppRule) {
         _rules.value = _rules.value.filterNot { it.pkg == rule.pkg && it.trigger == rule.trigger } + rule
         saveRules()
-        ForegroundWatcher.syncRunning(app, _rules.value, _enabled.value)
+        syncWatcher()
     }
 
     fun removeRule(rule: AppRule) {
         _rules.value = _rules.value.filterNot { it.pkg == rule.pkg && it.trigger == rule.trigger }
         saveRules()
-        ForegroundWatcher.syncRunning(app, _rules.value, _enabled.value)
+        syncWatcher()
     }
 
     fun savePreset(name: String) {

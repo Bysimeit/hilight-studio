@@ -14,6 +14,7 @@ final class OutputGate {
     private long alertStart;
     private long alertEnd;
     private boolean alertHeld;
+    private boolean alertOpenEnded;
 
     private long ambientDeadline;
 
@@ -21,6 +22,7 @@ final class OutputGate {
 
     void startAlert(long now, long durationMs) {
         alertHeld = true;
+        alertOpenEnded = durationMs <= 0;
         alertStart = now;
         alertEnd = now + durationMs;
     }
@@ -28,6 +30,7 @@ final class OutputGate {
     void clearAlert() {
         if (!alertHeld) return;
         alertHeld = false;
+        alertOpenEnded = false;
         blanked = false;
     }
 
@@ -38,6 +41,10 @@ final class OutputGate {
 
     boolean isAlertHeld() {
         return alertHeld;
+    }
+
+    boolean isAlertOpenEnded() {
+        return alertOpenEnded;
     }
 
     long alertElapsed(long now) {
@@ -54,7 +61,7 @@ final class OutputGate {
 
     Layer next(long now) {
         if (alertHeld) {
-            if (now < alertEnd) return Layer.ALERT;
+            if (alertOpenEnded || now < alertEnd) return Layer.ALERT;
             clearAlert();
         }
         if (now > ambientDeadline) {

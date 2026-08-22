@@ -83,7 +83,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        Store.get(this).refreshStatus()
+        Store.get(this).apply {
+            refreshStatus()
+            syncWatcher()
+        }
     }
 
     override fun onStop() {
