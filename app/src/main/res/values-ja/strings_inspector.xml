@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Japanese. The English source is quoted above each entry so a reviewer never has to hold two files
+    open at once. Terms are fixed by docs/i18n/ja-glossary.md — HiLight, MessagingStyle, shortcutId
+    and JSON stay in Latin script, "inspector" is 通知インスペクター, a conversation is チャット, and
+    a group summary is グループ通知のまとめ.
+
+    **Privacy:** as in the source, no message text may appear in any string here, and none may appear
+    in the export. inspector_privacy_note and inspector_export_note therefore state the promise as a
+    plain negative — メッセージ本文はここに表示されず、出力にも含まれません — with no hedge and no
+    claim wider than the English makes.
+
+    The three pill states are kept clearly apart, because the reader is telling them apart: 読み取り失敗
+    is a fault, 名前あり and 名前なし are neutral facts about what the app supplied. 名前なし must not
+    read as a fault, so it is a bare noun phrase and the note beside it (inspector_no_name_note) offers
+    the working alternative instead of an apology.
+
+    The inspector_field_* lines keep the English colon rather than taking a particle: they are a dense
+    stack of label-and-value lines read by eye, the colon lets them align, and a particle would make
+    each one a sentence. `プレビューはオフです: %1$s` in strings_main.xml sets the same precedent. All
+    six use a half-width colon and one space, and their values stay noun phrases.
+
+    "Saw" is 検知 throughout — the question this screen answers is whether HiLight noticed the
+    notification at all. 読み取り is reserved for reading a notification's fields, so the failure state
+    keeps its own verb.
+-->
+<resources>
+
+    <!-- The dialog frame -->
+    <!-- "Notification inspector" -->
+    <string name="inspector_title">通知インスペクター</string>
+    <!-- "Copy as JSON" -->
+    <string name="inspector_copy_json">JSON としてコピー</string>
+    <!-- "Send" — opens the share chooser -->
+    <string name="inspector_send">送信</string>
+
+    <!-- Shown at the top of the dialog, and passed into inspector_export_note so the same promise
+         travels with the exported data. 出力 is the same word the chooser title uses, so the promise
+         names the very thing being sent. -->
+    <!-- "Names, ids and structure only. Message text is never shown here and never exported." -->
+    <string name="inspector_privacy_note">名前と ID、構造だけです。メッセージ本文はここに表示されず、出力にも含まれません。</string>
+
+    <!-- How many notifications are listed. %1$d is the number of notifications. -->
+    <!-- "The last notification HiLight saw." -->
+    <string name="inspector_seen_one">HiLight が最後に検知した通知です。</string>
+    <!-- "The last %1$d notifications HiLight saw, newest first." -->
+    <string name="inspector_seen_many">HiLight が最後に検知した %1$d 件の通知です。新しい順に並んでいます。</string>
+
+    <!-- The export. The human-readable `note` value inside the JSON. %1$s is inspector_privacy_note. -->
+    <!-- "HiLight notification inspector, newest first. %1$s" -->
+    <string name="inspector_export_note">HiLight の通知インスペクター、新しい順です。%1$s</string>
+    <!-- "Copied as JSON" — a toast, so no full stop -->
+    <string name="inspector_copied_toast">JSON としてコピーしました</string>
+    <!-- "Send inspector output" -->
+    <string name="inspector_share_chooser_title">通知インスペクターの出力を送信</string>
+
+    <!-- Before any notification has arrived -->
+    <!-- "Nothing seen yet" — a title, so no full stop -->
+    <string name="inspector_empty_title">まだ何も検知していません</string>
+    <!-- "Notifications appear here as they arrive, so leave this open — or reopen it once one has landed." -->
+    <string name="inspector_empty_body">通知は届いた時点でここに表示されます。この画面を開いたままにしておくか、通知が届いてから開き直してください。</string>
+    <!-- "Nothing is seen at all without notification access. The list is kept in memory only, so it
+         empties whenever HiLight stops." -->
+    <string name="inspector_empty_access">通知へのアクセスがないと、通知はまったく検知されません。一覧はメモリ上にだけ保持されるため、HiLight が停止するたびに空になります。</string>
+
+    <!-- The pill on each card. Three states, kept plainly distinct: only the first names a fault, and
+         あり/なし are parallel so the middle case reads as a fact about the app, not a failure. -->
+    <!-- "could not read" -->
+    <string name="inspector_pill_read_failed">読み取り失敗</string>
+    <!-- "name found" -->
+    <string name="inspector_pill_name_found">名前あり</string>
+    <!-- "no name" -->
+    <string name="inspector_pill_no_name">名前なし</string>
+
+    <!-- One line per field the matcher reads. Colon and one space in every one; %1$s is the value the
+         app supplied, or common_none (なし) where it supplied nothing. shortcutId keeps its API
+         spelling, which is also its key in the exported JSON, so a bug report reads as one thing. -->
+    <!-- "Shortcut id: %1$s" -->
+    <string name="inspector_field_shortcut_id">shortcutId: %1$s</string>
+    <!-- "Sender: %1$s" -->
+    <string name="inspector_field_sender">送信者: %1$s</string>
+    <!-- "Conversation: %1$s" -->
+    <string name="inspector_field_conversation">チャット: %1$s</string>
+    <!-- "Title: %1$s" -->
+    <string name="inspector_field_title">タイトル: %1$s</string>
+    <!-- "MessagingStyle: detected" — a state rather than a supplied value, so it is a noun in the same
+         label-and-value shape as the lines above -->
+    <string name="inspector_field_messaging_style_detected">MessagingStyle: 検出</string>
+    <!-- "MessagingStyle: not detected" -->
+    <string name="inspector_field_messaging_style_not_detected">MessagingStyle: 未検出</string>
+
+    <!-- What the fields above mean, said only where it is true -->
+    <!-- "This notification could not be read, so the fields below are missing rather than absent. That
+         is a fault worth reporting with this output attached." -->
+    <string name="inspector_read_failed_note">この通知は読み取れませんでした。以下の項目は、アプリが値を設定しなかったのではなく、読み取りに失敗して欠けています。この出力を添えて報告する価値のある不具合です。</string>
+    <!-- "Group summary, which HiLight ignores so a chat cannot fire twice." -->
+    <string name="inspector_group_summary">グループ通知のまとめです。同じチャットで 2 回点灯しないよう、HiLight は無視します。</string>
+    <!-- "This app gave no name to match on, so no per-chat rule can be written from it. A rule for the
+         whole app still works." — 連絡先別ルール throughout, one name for one feature.
+         chat rather than a person -->
+    <string name="inspector_no_name_note">このアプリは一致に使える名前を渡していないため、この通知から連絡先別ルールを作ることはできません。アプリ全体のルールならそのまま使えます。</string>
+
+    <!-- The foreground watcher's ongoing notification, and the channel it sits on. Both are read in
+         the system notification settings and the shade, so they are as short as Android's own. -->
+    <!-- "HiLight app watcher" -->
+    <string name="service_watcher_channel_name">HiLight のアプリ監視</string>
+    <!-- "HiLight Studio" — product name, not translated -->
+    <string name="service_watcher_title">HiLight Studio</string>
+    <!-- "Watching for apps with light rules" — shade text, so a fragment with no full stop -->
+    <string name="service_watcher_text">点灯ルールのあるアプリを監視中</string>
+
+</resources>

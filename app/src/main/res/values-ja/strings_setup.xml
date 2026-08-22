@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Japanese. English source quoted above each entry. Terms follow docs/i18n/ja-glossary.md.
+
+    Android's own Japanese is used for the system features this screen talks about: サイレントモード for
+    Do Not Disturb, バッテリーセーバー for Battery Saver, ワイヤレスデバッグ for Wireless debugging, and
+    通知へのアクセス / 使用状況へのアクセス for the two special accesses, so that the wording matches the
+    Settings screens these buttons open.
+
+    The adb command lines themselves are constants in code and appear untranslated between these
+    captions, which is why the ADB card's prose refers to "1 行目" rather than quoting the command.
+-->
+<resources>
+
+    <!-- Auto-off -->
+    <!-- "Auto-off" -->
+    <string name="setup_auto_off_title">自動オフ</string>
+    <!-- "The always-on look switches itself off after this. App rules still work." -->
+    <string name="setup_auto_off_body">常時点灯スタイルはこの時間が過ぎると自動でオフになります。アプリ別ルールはそのまま動作します。</string>
+    <!-- "Hardware protection is always on: brightness eases down after 10s of unbroken light, and the
+         array rests if it has been lit for more than half of the last 10 minutes." -->
+    <string name="setup_auto_off_protection">ハードウェア保護は常に有効です。10 秒続けて点灯すると明るさが徐々に下がり、直近 10 分のうち半分以上点灯していた場合は LED アレイが休止します。</string>
+    <!-- "Stay on for" -->
+    <string name="setup_stay_on_for">点灯時間</string>
+
+    <!-- The two-step warning before the array may stay lit for minutes at a time -->
+    <!-- "Allow up to 5 minutes" -->
+    <string name="setup_allow_five_minutes">最大 5 分まで許可</string>
+    <!-- "Longer than 30 seconds?" -->
+    <string name="setup_warn_long_title">30 秒より長くしますか</string>
+    <!-- "The LEDs draw power the whole time they are lit, and stock HiLight only flashes for a
+         moment — nothing about the hardware is built for minutes of continuous light." -->
+    <string name="setup_warn_long_body">LED は点灯している間ずっと電力を消費します。標準の HiLight は一瞬光るだけで、このハードウェアは数分間の連続点灯を想定して作られていません。</string>
+    <!-- "Are you sure?" -->
+    <string name="setup_warn_long_confirm_title">本当に設定しますか</string>
+    <!-- "Up to 5 minutes of continuous illumination will cost battery, and animations freeze lit if
+         the phone sleeps. You can turn this back down at any time." -->
+    <string name="setup_warn_long_confirm_body">最大 5 分の連続点灯は電池を消費します。端末がスリープに入るとアニメーションは点灯したまま停止します。設定はいつでも戻せます。</string>
+
+    <!-- When to stay dark -->
+    <!-- "When to stay dark" -->
+    <string name="setup_dark_title">消灯する条件</string>
+    <!-- "Only while the screen is off" -->
+    <string name="setup_screen_off_only">画面消灯時のみ</string>
+    <!-- "From %1$s" — %1$s is a 24-hour clock time -->
+    <string name="setup_quiet_from">開始 %1$s</string>
+    <!-- "Until %1$s" -->
+    <string name="setup_quiet_until">終了 %1$s</string>
+    <!-- "Dim instead of dark" -->
+    <string name="setup_quiet_dim">消灯せずに暗くする</string>
+    <!-- "Dim to" -->
+    <string name="setup_dim_to">明るさ</string>
+    <!-- "Respect Do Not Disturb" -->
+    <string name="setup_respect_dnd">サイレントモードに従う</string>
+    <!-- "Pause in Battery Saver" -->
+    <string name="setup_pause_saver">バッテリーセーバー中は停止</string>
+    <!-- "Pause on low battery" -->
+    <string name="setup_pause_low_battery">電池残量が少ないときは停止</string>
+    <!-- "Pause below" -->
+    <string name="setup_pause_below">停止する残量</string>
+    <!-- "Ignored while charging. Battery Saver pauses it either way." -->
+    <string name="setup_battery_note">充電中は適用されません。バッテリーセーバー中はいずれの場合も停止します。</string>
+
+    <!-- "%1$d%%" -->
+    <string name="setup_percent">%1$d%%</string>
+
+    <!-- Privileged access -->
+    <!-- "Privileged access" -->
+    <string name="setup_privileged_title">特権アクセス</string>
+    <!-- "The renderer needs shell-UID privileges. Choose how it starts." -->
+    <string name="setup_privileged_body">レンダラーには shell UID の権限が必要です。起動方法を選んでください。</string>
+    <!-- "Prefers Shizuku, falls back to ADB." -->
+    <string name="setup_transport_auto_note">Shizuku を優先し、使えない場合は ADB を使います。</string>
+
+    <!-- The Shizuku card. The pill words describe the connection, so they stay short. -->
+    <!-- "connected" -->
+    <string name="shizuku_state_connected">接続済み</string>
+    <!-- "connecting" -->
+    <string name="shizuku_state_connecting">接続中</string>
+    <!-- "approve it" -->
+    <string name="shizuku_state_needs_permission">許可が必要</string>
+    <!-- "not running" -->
+    <string name="shizuku_state_not_running">未起動</string>
+    <!-- "not installed" -->
+    <string name="shizuku_state_not_installed">未インストール</string>
+    <!-- "failed" -->
+    <string name="shizuku_state_failed">失敗</string>
+    <!-- "After Shizuku restarts (or a reboot), reopen this app once to reattach." -->
+    <string name="shizuku_reattach_note">Shizuku を再起動した後、または端末を再起動した後は、このアプリを一度開き直して再接続してください。</string>
+    <!-- "No computer needed — start it via Wireless debugging." -->
+    <string name="shizuku_not_installed_body">パソコンは不要です。ワイヤレスデバッグから起動できます。</string>
+    <!-- "Get Shizuku" -->
+    <string name="shizuku_get">Shizuku を入手</string>
+    <!-- "Start it under Wireless debugging. Needed again after each reboot." -->
+    <string name="shizuku_not_running_body">ワイヤレスデバッグから起動してください。端末を再起動するたびに必要です。</string>
+    <!-- "Open Shizuku" -->
+    <string name="shizuku_open">Shizuku を開く</string>
+    <!-- "Check again" -->
+    <string name="shizuku_check_again">再確認</string>
+    <!-- "Running. Approve this app to use it." -->
+    <string name="shizuku_needs_permission_body">起動しています。このアプリの使用を許可してください。</string>
+    <!-- "Request access" -->
+    <string name="shizuku_request_access">許可を求める</string>
+    <!-- "Renderer running in Shizuku's shell-UID process." -->
+    <string name="shizuku_connected_body">レンダラーは Shizuku の shell UID プロセスで動作しています。</string>
+    <!-- "Disconnect" -->
+    <string name="shizuku_disconnect">切断</string>
+    <!-- "service returned a dead binder" — HiLight's own diagnosis, so it is translated -->
+    <string name="shizuku_error_dead_binder">サービスが無効なバインダーを返しました</string>
+    <!-- "Shizuku is too old; v11 or newer is required" -->
+    <string name="shizuku_error_too_old">Shizuku のバージョンが古すぎます。v11 以降が必要です</string>
+    <!-- "Could not reach Shizuku." -->
+    <string name="shizuku_unreachable">Shizuku に接続できませんでした。</string>
+    <!-- "Retry" -->
+    <string name="shizuku_retry">再試行</string>
+    <!-- "No browser available" -->
+    <string name="setup_no_browser">利用できるブラウザがありません</string>
+
+    <!-- The ADB card. The command lines between these captions are untranslated literals. -->
+    <!-- "ADB" -->
+    <string name="adb_title">ADB</string>
+    <!-- "Run both lines with the phone plugged in. Nothing to push. Re-run after a reboot — and the
+         first line matters every time, since a leftover renderer keeps the array dark." -->
+    <string name="adb_body">端末を接続した状態で 2 行とも実行してください。転送するファイルはありません。端末を再起動したら再実行が必要です。1 行目は毎回重要です。前回のレンダラーが残っていると LED アレイは消灯したままになります。</string>
+    <!-- "Works in Terminal on macOS and Linux, and in PowerShell. In Windows Command Prompt, copy the
+         cmd.exe version instead — it has no single quotes." -->
+    <string name="adb_shells_note">macOS と Linux のターミナル、および PowerShell で動作します。Windows のコマンドプロンプトでは、シングルクォートを使わない cmd.exe 用をコピーしてください。</string>
+    <!-- "Copy" -->
+    <string name="adb_copy">コピー</string>
+    <!-- "Copy for cmd.exe" -->
+    <string name="adb_copy_cmd">cmd.exe 用をコピー</string>
+    <!-- "Command copied" -->
+    <string name="adb_copied">コマンドをコピーしました</string>
+    <!-- "cmd.exe version copied" -->
+    <string name="adb_copied_cmd">cmd.exe 用をコピーしました</string>
+    <!-- "It worked if the array responds. Nothing printed means it did not start." -->
+    <string name="adb_verify_note">LED アレイが反応すれば成功です。何も表示されない場合は起動していません。</string>
+    <!-- "Send to computer" -->
+    <string name="adb_send">パソコンに送る</string>
+    <!-- "Send command" -->
+    <string name="adb_share_title">コマンドを送信</string>
+
+    <!-- Notification access -->
+    <!-- "Notification access" -->
+    <string name="setup_notif_title">通知へのアクセス</string>
+    <!-- "granted" -->
+    <string name="setup_state_granted">許可済み</string>
+    <!-- "needed" -->
+    <string name="setup_state_needed">許可が必要</string>
+    <!-- "Lets rules see which app notified you." -->
+    <string name="setup_notif_body">どのアプリから通知が届いたかをルールが判別できるようになります。</string>
+    <!-- "Open notification access" -->
+    <string name="setup_open_notif_access">通知へのアクセスを開く</string>
+    <!-- "Shows what HiLight reads from each notification. No message text." -->
+    <string name="setup_inspector_body">HiLight が各通知から読み取った内容を表示します。メッセージ本文は含みません。</string>
+    <!-- "Notification inspector" -->
+    <string name="setup_inspector_button">通知インスペクター</string>
+
+    <!-- The remembered chat names -->
+    <!-- "No chats remembered yet. Chats are listed here so per-contact rules need no typing." -->
+    <string name="setup_chats_none">記憶されたチャットはまだありません。ここに一覧されることで、連絡先別ルールを作るときに名前を入力する必要がなくなります。</string>
+    <!-- "%1$d chat names remembered on this device, so per-contact rules need no typing. Existing
+         rules keep working if you clear them." -->
+    <string name="setup_chats_remembered">この端末に %1$d 件のチャット名を記憶しています。そのため連絡先別ルールを作るときに名前を入力する必要がありません。削除しても既存のルールはそのまま動作します。</string>
+    <!-- "Forget remembered chats" -->
+    <string name="setup_forget_chats_button">記憶したチャットを削除</string>
+    <!-- "Forget remembered chats?" -->
+    <string name="setup_forget_chats_title">記憶したチャットを削除しますか</string>
+    <!-- "The list the per-contact picker offers is cleared. Rules you have already made keep working,
+         and chats are remembered again as messages arrive." -->
+    <string name="setup_forget_chats_body">連絡先別ルールの選択画面に表示される一覧が消去されます。すでに作成したルールはそのまま動作し、メッセージが届くたびにチャットは再び記憶されます。</string>
+    <!-- "Forget them" -->
+    <string name="setup_forget_chats_confirm">削除する</string>
+    <!-- "Keep them" -->
+    <string name="setup_forget_chats_dismiss">残す</string>
+
+    <!-- Usage access -->
+    <!-- "Usage access" -->
+    <string name="setup_usage_title">使用状況へのアクセス</string>
+    <!-- "optional" -->
+    <string name="setup_state_optional">任意</string>
+    <!-- "Only for \"while open\" rules." -->
+    <string name="setup_usage_body">「アプリ表示中」ルールにのみ使用します。</string>
+    <!-- "Open usage access" -->
+    <string name="setup_open_usage_access">使用状況へのアクセスを開く</string>
+
+    <!-- Appearance -->
+    <!-- "Appearance" -->
+    <string name="setup_appearance_title">外観</string>
+    <!-- "Wallpaper colours" -->
+    <string name="setup_wallpaper_colours">壁紙の色</string>
+
+    <!-- The self test. The channel name is also seen in the system's notification settings. -->
+    <!-- "End-to-end test" -->
+    <string name="setup_test_title">通し動作テスト</string>
+    <!-- "Posts a notification from this app. Add a rule for HiLight Studio first." -->
+    <string name="setup_test_body">このアプリから通知を送信します。先に HiLight Studio のルールを追加してください。</string>
+    <!-- "Post test notification" -->
+    <string name="setup_test_button">テスト通知を送信</string>
+    <!-- "Self test" -->
+    <string name="setup_selftest_channel">セルフテスト</string>
+    <!-- "HiLight self test" -->
+    <string name="setup_selftest_title">HiLight セルフテスト</string>
+    <!-- "If a rule exists for this app, the LEDs just fired" -->
+    <string name="setup_selftest_body">このアプリのルールがあれば、今 LED が点灯しました</string>
+
+    <!-- Session priority -->
+    <!-- "Session priority" -->
+    <string name="setup_priority_title">セッションの優先度</string>
+    <!-- "Raise if the system's own effects interrupt yours; lower to let them win." -->
+    <string name="setup_priority_body">システム側の演出に邪魔される場合は上げ、システム側を優先させたい場合は下げてください。</string>
+    <!-- "Priority" -->
+    <string name="setup_priority_label">優先度</string>
+
+</resources>

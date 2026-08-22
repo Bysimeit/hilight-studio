@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Setup tab: auto-off, the guards that hold the array dark, how the privileged renderer is
+    reached, the two system permissions, appearance, the self test and session priority.
+
+    Prefixes follow the cards rather than the file: setup_ for the tab, and shizuku_ / adb_ for the
+    two transport cards, each of which reads as a small screen of its own.
+
+    Nothing that is not shown to a person is here. The adb command lines and the shell snippets
+    inside them are identical in every language and stay as constants in SetupScreen.kt, as do the
+    notification channel id, the clipboard label and the AnimatedContent debug labels.
+-->
+<resources>
+
+    <!-- Auto-off. The trailing readout and the slider badge both come from the shared duration
+         strings, so only the prose is here. -->
+    <string name="setup_auto_off_title">Auto-off</string>
+    <string name="setup_auto_off_body">The always-on look switches itself off after this. App rules still work.</string>
+    <string name="setup_auto_off_protection">Hardware protection is always on: brightness eases down after 10s of unbroken light, and the array rests if it has been lit for more than half of the last 10 minutes.</string>
+    <string name="setup_stay_on_for">Stay on for</string>
+
+    <!-- The two-step warning shown before the array may stay lit for minutes at a time. The first
+         dialog explains, the second makes the reader commit. -->
+    <string name="setup_allow_five_minutes">Allow up to 5 minutes</string>
+    <string name="setup_warn_long_title">Longer than 30 seconds?</string>
+    <string name="setup_warn_long_body">The LEDs draw power the whole time they are lit, and stock HiLight only flashes for a moment — nothing about the hardware is built for minutes of continuous light.</string>
+    <string name="setup_warn_long_confirm_title">Are you sure?</string>
+    <string name="setup_warn_long_confirm_body">Up to 5 minutes of continuous illumination will cost battery, and animations freeze lit if the phone sleeps. You can turn this back down at any time.</string>
+
+    <!-- When to stay dark. The "Quiet hours" toggle reuses suppression_quiet_hours, which is the
+         same words said of the same thing. -->
+    <string name="setup_dark_title">When to stay dark</string>
+    <string name="setup_screen_off_only">Only while the screen is off</string>
+    <!-- Both take a 24-hour clock time, which is formatted in code because it carries no words. -->
+    <string name="setup_quiet_from">From %1$s</string>
+    <string name="setup_quiet_until">Until %1$s</string>
+    <string name="setup_quiet_dim">Dim instead of dark</string>
+    <string name="setup_dim_to">Dim to</string>
+    <string name="setup_respect_dnd">Respect Do Not Disturb</string>
+    <string name="setup_pause_saver">Pause in Battery Saver</string>
+    <string name="setup_pause_low_battery">Pause on low battery</string>
+    <string name="setup_pause_below">Pause below</string>
+    <string name="setup_battery_note">Ignored while charging. Battery Saver pauses it either way.</string>
+
+    <!-- Slider badge for the two percentage sliders above. -->
+    <string name="setup_percent">%1$d%%</string>
+
+    <!-- Privileged access. The three transport names themselves are in strings_common.xml. -->
+    <string name="setup_privileged_title">Privileged access</string>
+    <string name="setup_privileged_body">The renderer needs shell-UID privileges. Choose how it starts.</string>
+    <string name="setup_transport_auto_note">Prefers Shizuku, falls back to ADB.</string>
+
+    <!-- The Shizuku card. Its title reuses transport_shizuku: the card is named after the transport.
+         The pill words describe the connection, not the app, so they are lower case. -->
+    <string name="shizuku_state_connected">connected</string>
+    <string name="shizuku_state_connecting">connecting</string>
+    <string name="shizuku_state_needs_permission">approve it</string>
+    <string name="shizuku_state_not_running">not running</string>
+    <string name="shizuku_state_not_installed">not installed</string>
+    <string name="shizuku_state_failed">failed</string>
+    <string name="shizuku_reattach_note">After Shizuku restarts (or a reboot), reopen this app once to reattach.</string>
+    <string name="shizuku_not_installed_body">No computer needed — start it via Wireless debugging.</string>
+    <string name="shizuku_get">Get Shizuku</string>
+    <string name="shizuku_not_running_body">Start it under Wireless debugging. Needed again after each reboot.</string>
+    <string name="shizuku_open">Open Shizuku</string>
+    <string name="shizuku_check_again">Check again</string>
+    <string name="shizuku_needs_permission_body">Running. Approve this app to use it.</string>
+    <string name="shizuku_request_access">Request access</string>
+    <string name="shizuku_connected_body">Renderer running in Shizuku\'s shell-UID process.</string>
+    <string name="shizuku_disconnect">Disconnect</string>
+    <!-- Fallback for when the backend has no error of its own to report. -->
+    <!-- Failures HiLight diagnoses itself. Anything the framework hands us keeps its own wording,
+         which is not translated. -->
+    <string name="shizuku_error_dead_binder">service returned a dead binder</string>
+    <string name="shizuku_error_too_old">Shizuku is too old; v11 or newer is required</string>
+    <string name="shizuku_unreachable">Could not reach Shizuku.</string>
+    <string name="shizuku_retry">Retry</string>
+    <!-- Said when there is no browser to open the Shizuku listing in. -->
+    <string name="setup_no_browser">No browser available</string>
+
+    <!-- The ADB card. Its title is the tool, not the transport, so it is not transport_adb. The two
+         command lines shown between these captions are literals in code. -->
+    <string name="adb_title">ADB</string>
+    <string name="adb_body">Run both lines with the phone plugged in. Nothing to push. Re-run after a reboot — and the first line matters every time, since a leftover renderer keeps the array dark.</string>
+    <string name="adb_shells_note">Works in Terminal on macOS and Linux, and in PowerShell. In Windows Command Prompt, copy the cmd.exe version instead — it has no single quotes.</string>
+    <string name="adb_copy">Copy</string>
+    <string name="adb_copy_cmd">Copy for cmd.exe</string>
+    <string name="adb_copied">Command copied</string>
+    <string name="adb_copied_cmd">cmd.exe version copied</string>
+    <string name="adb_verify_note">It worked if the array responds. Nothing printed means it did not start.</string>
+    <string name="adb_send">Send to computer</string>
+    <!-- Title of the system share sheet the command is handed to. -->
+    <string name="adb_share_title">Send command</string>
+
+    <!-- Notification access. The pill words are shared with usage access below. -->
+    <string name="setup_notif_title">Notification access</string>
+    <string name="setup_state_granted">granted</string>
+    <string name="setup_state_needed">needed</string>
+    <string name="setup_notif_body">Lets rules see which app notified you.</string>
+    <string name="setup_open_notif_access">Open notification access</string>
+    <string name="setup_inspector_body">Shows what HiLight reads from each notification. No message text.</string>
+    <string name="setup_inspector_button">Notification inspector</string>
+
+    <!-- The remembered chat names, which exist so per-contact rules need no typing. Said two ways
+         because an empty list has nothing to count. -->
+    <string name="setup_chats_none">No chats remembered yet. Chats are listed here so per-contact rules need no typing.</string>
+    <string name="setup_chats_remembered">%1$d chat names remembered on this device, so per-contact rules need no typing. Existing rules keep working if you clear them.</string>
+    <string name="setup_forget_chats_button">Forget remembered chats</string>
+    <string name="setup_forget_chats_title">Forget remembered chats?</string>
+    <string name="setup_forget_chats_body">The list the per-contact picker offers is cleared. Rules you have already made keep working, and chats are remembered again as messages arrive.</string>
+    <string name="setup_forget_chats_confirm">Forget them</string>
+    <string name="setup_forget_chats_dismiss">Keep them</string>
+
+    <!-- Usage access -->
+    <string name="setup_usage_title">Usage access</string>
+    <string name="setup_state_optional">optional</string>
+    <string name="setup_usage_body">Only for \"while open\" rules.</string>
+    <string name="setup_open_usage_access">Open usage access</string>
+
+    <!-- Appearance -->
+    <string name="setup_appearance_title">Appearance</string>
+    <string name="setup_wallpaper_colours">Wallpaper colours</string>
+
+    <!-- The self test posts a real notification from this app, so the channel name is seen in the
+         system's own notification settings as well. -->
+    <string name="setup_test_title">End-to-end test</string>
+    <string name="setup_test_body">Posts a notification from this app. Add a rule for HiLight Studio first.</string>
+    <string name="setup_test_button">Post test notification</string>
+    <string name="setup_selftest_channel">Self test</string>
+    <string name="setup_selftest_title">HiLight self test</string>
+    <string name="setup_selftest_body">If a rule exists for this app, the LEDs just fired</string>
+
+    <!-- Session priority. The badge shows the bare number, which is formatted in code. -->
+    <string name="setup_priority_title">Session priority</string>
+    <string name="setup_priority_body">Raise if the system\'s own effects interrupt yours; lower to let them win.</string>
+    <string name="setup_priority_label">Priority</string>
+    <string name="setup_priority_calls">Calls are where this bites: the phone has its own HiLight animation for them, and at equal priority the two are interleaved.</string>
+</resources>

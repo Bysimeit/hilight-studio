@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app bar, the device illustration, and the Quick Settings tile. -->
+<resources>
+
+    <!-- Top bar. %1$d is the number of LEDs the renderer reported, %2$s how it is reached. -->
+    <string name="main_connected_pill">%1$d LEDs · %2$s</string>
+    <string name="main_not_connected">not connected</string>
+
+    <!-- Spoken descriptions of the device illustration. Never seen, only read aloud, so they are
+         written as sentences rather than as labels. %1$s is the model, %2$s what it is doing. -->
+    <string name="hero_description">%1$s, camera bar with the HiLight array. %2$s</string>
+    <string name="hero_no_array">This model has no HiLight array.</string>
+    <string name="hero_array_off">The array is off.</string>
+    <string name="hero_showing">Showing %1$s.</string>
+    <string name="hero_strip_preview">Preview of %1$s across eight LEDs</string>
+    <string name="hero_strip_off">Preview off: %1$s</string>
+
+</resources>

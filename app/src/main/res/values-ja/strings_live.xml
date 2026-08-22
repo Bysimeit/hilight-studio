@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Japanese. The English source is quoted above each entry so a reviewer never has to hold two files
+    open at once. Terms are fixed by docs/i18n/ja-glossary.md — HiLight, LED and Pro stay in Latin
+    script, and Android's own Japanese is followed for 通知 and バッテリーセーバー.
+
+    Register: polite-neutral です・ます for captions, which are full sentences and take 。; the hero
+    status, the toggle titles, the tile subtitles and the rule fragments are noun phrases with no full
+    stop.
+
+    This is the tightest file in the app for width. The hero status shares its row with the model
+    name, the rule summary shares its row with the rule's own label, and the Quick Settings tile
+    subtitle is truncated by the system with no wrap at all — so every string here is the shortest
+    rendering that still reads as Japanese. The " · " separator and every placeholder are kept exactly
+    as the source has them.
+-->
+<resources>
+
+    <!-- Hero card: what HiLight is doing right now. %1$s is the pattern name. -->
+    <!-- "HiLight not available" — said of a non-Pro Pixel, so it is "unsupported", not "busy" -->
+    <string name="live_status_unavailable">HiLight 非対応</string>
+    <!-- "Testing · %1$s" -->
+    <string name="live_status_testing">テスト中 · %1$s</string>
+    <!-- "HiLight · %1$s" — the product name carries the line, so nothing to translate -->
+    <string name="live_status_on">HiLight · %1$s</string>
+    <!-- "HiLight is with the system" — the phone's own effects have the array, which is the normal
+         resting state and not a fault, so the Japanese names the system as the one in control -->
+    <string name="live_status_system">HiLight はシステムが制御中</string>
+
+    <!-- The line under the hero. %1$s is the model name, or "this device" on a phone HiLight has no
+         drawing for. A space is kept after the placeholder, as in strings_main.xml. -->
+    <!-- "%1$s has no HiLight array — the feature is Pro-only." -->
+    <string name="live_hint_no_array">%1$s に HiLight の LED アレイはありません。Pro モデル専用の機能です。</string>
+    <!-- "Connect a renderer in Setup to drive the array." -->
+    <string name="live_hint_no_renderer">LED アレイを制御するには、設定タブでレンダラーを接続してください。</string>
+    <!-- "Turn the phone over to see it for real." -->
+    <string name="live_hint_look">実際の点灯を見るには、端末を裏返してください。</string>
+    <!-- "Take over the array with the switch below." -->
+    <string name="live_hint_take_over">下のスイッチで LED アレイの制御を引き継げます。</string>
+
+    <!-- Master switch -->
+    <!-- "Driving HiLight" — this app is the one driving it -->
+    <string name="live_toggle_driving">HiLight を制御中</string>
+    <!-- "System has HiLight" — the mirror of the line above, with the system as the subject -->
+    <string name="live_toggle_system">システムが HiLight を制御中</string>
+
+    <!-- Why the array is dark while the switch is on. These are the full explanations; the two-word
+         forms the tile shows are suppression_* in strings_common.xml. -->
+    <!-- "Quiet hours: the array stays dark until your window ends." -->
+    <string name="live_suppressed_quiet_hours">サイレント時間です。設定した時間帯が終わるまで LED アレイは消灯したままです。</string>
+    <!-- "Battery is low, so the array is paused. Charging resumes it." -->
+    <string name="live_suppressed_low_battery">電池残量が少ないため、LED アレイを一時停止しています。充電すると再開します。</string>
+    <!-- "Battery Saver is on, so the array is paused." -->
+    <string name="live_suppressed_power_saver">バッテリーセーバーがオンのため、LED アレイを一時停止しています。</string>
+    <!-- "Set to light only while the screen is off." -->
+    <string name="live_suppressed_screen_on">画面消灯時のみ点灯する設定になっています。</string>
+
+    <!-- The safety limits, said out loud so that a dark array never reads as a fault. In the
+         countdown %1$d is the seconds left and %2$d the percentage of the duty allowance spent. The
+         seconds unit is written into the line rather than taken from duration_seconds, and it sits
+         tight against the number there exactly as duration_seconds does. -->
+    <!-- "Resting to protect the LEDs — they have been lit too much recently." -->
+    <string name="live_safety_resting">LED を保護するため休止しています。直近の点灯時間が長すぎました。</string>
+    <!-- "Auto-off reached. Change the style or flip the switch to light it again." -->
+    <string name="live_safety_timed_out">自動オフに達しました。もう一度点灯するには、スタイルを変えるかスイッチを切り替えてください。</string>
+    <!-- "Auto-off in %1$ds · duty used %2$d%%" — "used" is left implied: the line has to stay on one
+         row next to the pid caption -->
+    <string name="live_safety_countdown">自動オフまで %1$d秒 · 点灯時間 %2$d%%</string>
+
+    <!-- Renderer diagnostics under the countdown. %1$d is the process id, %2$s one of the two
+         session states below. "pid" stays as it is: it is what the reader would search for. -->
+    <!-- "renderer pid %1$d · %2$s" -->
+    <string name="live_renderer_pid">レンダラー pid %1$d · %2$s</string>
+    <!-- "session open" -->
+    <string name="live_session_open">セッションあり</string>
+    <!-- "session closed" -->
+    <string name="live_session_closed">セッションなし</string>
+
+    <!-- One-tap effects. The tiles borrow the pattern names from strings_common.xml, except that a
+         third of a row is too narrow for ランダムな色. -->
+    <!-- "Try an effect" — エフェクト rather than 効果, which reads as "benefit" for a light -->
+    <string name="live_tests_title">エフェクトを試す</string>
+    <!-- "Fires for four seconds on the real LEDs, then returns to your style." -->
+    <string name="live_tests_caption">実際の LED で 4 秒間点灯してから、元のスタイルに戻ります。</string>
+    <!-- "Random" — the tile is a third of a row wide, so the 色 of pattern_random is dropped -->
+    <string name="live_test_random">ランダム</string>
+
+    <!-- The rules list. %1$d is how many rules are on. In the per-rule line %1$s is the colour or
+         pattern and %2$s is what sets the rule off; the source order reads naturally in Japanese, so
+         it is kept. -->
+    <!-- "App rules" -->
+    <string name="live_rules_title">アプリ別ルール</string>
+    <!-- "%1$d on" -->
+    <string name="live_rules_on_count">%1$d 件オン</string>
+    <!-- "Nothing yet. Add per-app colours in the Apps tab." -->
+    <string name="live_rules_empty">まだありません。アプリタブでアプリ別の色を追加できます。</string>
+    <!-- "%1$s · %2$s" -->
+    <string name="live_rule_summary">%1$s · %2$s</string>
+    <!-- "random" -->
+    <string name="live_rule_random">ランダム</string>
+    <!-- "notify" -->
+    <string name="live_rule_notify">通知</string>
+    <!-- "in app" — the trigger is the app being in use, not something inside it -->
+    <string name="live_rule_in_app">使用中</string>
+
+    <!-- Quick Settings tile. Its label is set from the service, not taken from the manifest, because
+         a tile has room for the feature name and not the full app name. tile_off is the state of the
+         array rather than the name of the Off pattern, so it stays a string of its own — and in
+         Japanese it is a different word: 消灯 for the dark array, オフ for the pattern. -->
+    <!-- "HiLight" — product name -->
+    <string name="tile_label">HiLight</string>
+    <!-- "No renderer" — レンダラー未接続 is eight characters and the subtitle truncates, so the
+         renderer is left implied, matching main_not_connected -->
+    <string name="tile_no_renderer">未接続</string>
+    <!-- "Off" — the array is dark, not the Off pattern selected -->
+    <string name="tile_off">消灯</string>
+    <!-- "Resting" -->
+    <string name="tile_resting">休止中</string>
+    <!-- "Timed out" — what ran out is the auto-off timer, so the subtitle names it -->
+    <string name="tile_timed_out">自動オフ</string>
+
+    <!-- The colour picker. widget_colour is the heading it falls back to when a caller does not name
+         the colour it is editing; %1$d in widget_percent is a percentage of full. Intensity is the
+         HSV value channel, so 明度, which leaves 明るさ free for style_brightness on the same screen. -->
+    <!-- "Colour" -->
+    <string name="widget_colour">色</string>
+    <!-- "Saturation" -->
+    <string name="widget_saturation">彩度</string>
+    <!-- "Intensity" -->
+    <string name="widget_intensity">明度</string>
+    <!-- "%1$d%%" -->
+    <string name="widget_percent">%1$d%%</string>
+
+</resources>

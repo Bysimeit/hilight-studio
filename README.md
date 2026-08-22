@@ -19,10 +19,12 @@ Control the eight-LED HiLight array on Pixel 11 Pro devices.
 
 - Solid colours and animated patterns across all eight LEDs
 - Per-app rules for foreground use and notifications
+- Per-contact rules: a colour for one person or one chat, picked from the chats HiLight has seen
 - Saved presets with import and export
 - Wallpaper-derived colours and a Quick Settings tile
 - Quiet hours, Do Not Disturb, Battery Saver, and low-battery controls
 - Set up entirely on the phone: no computer, no companion app, no root
+- English and Japanese, selectable per app from Android's own language settings
 
 ## Screenshots
 
@@ -138,6 +140,8 @@ See [Technical details](docs/TECHNICAL.md) for the renderer architecture, hardwa
 HiLight Studio has no analytics, account system, or telemetry. App rules and presets stay on the device. Notification and usage access are optional and are used locally for the rules you enable.
 
 The app declares `android.permission.INTERNET` and `android.permission.ACCESS_LOCAL_NETWORK` because Android gates sockets and local service discovery behind them, including the connection HiLight Studio makes to the phone's own debug daemon during setup. Nothing in the project contacts a remote host.
+
+Per-contact rules read the sender's name from the notification itself, so they need no contacts permission — picking a contact by hand uses the system picker, which hands over only the row you tap. HiLight remembers the names of chats it has seen so the picker needs no typing; that list is stored on the device, is capped, and can be cleared at any time with **Forget remembered chats** under Setup. Message text is never stored, never logged, and never included in anything the notification inspector copies or shares.
 
 ## Build from source
 

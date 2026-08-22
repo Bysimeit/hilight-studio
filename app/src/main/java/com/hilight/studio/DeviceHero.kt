@@ -1,6 +1,7 @@
 package com.hilight.studio
 
 import android.os.Build
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -27,14 +28,20 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlin.math.cos
 import kotlin.math.sin
 
 enum class DeviceProfile(
+    /**
+     * Marketing name, which is not translated — a Pixel 11 Pro is called that in every language.
+     * [labelRes] is set only for the fallback profile, whose label is a phrase rather than a name.
+     */
     val label: String,
-
+    @StringRes val labelRes: Int? = null,
+    /** width / height of the body */
     val aspect: Float,
     val lensCount: Int,
     val hasHiLight: Boolean,
@@ -51,7 +58,7 @@ enum class DeviceProfile(
         zoom = 1.15f, originX = 0.035f,
     ),
     BASE("Pixel 11", aspect = 0.462f, lensCount = 2, hasHiLight = false),
-    GENERIC("this device", aspect = 0.465f, lensCount = 3, hasHiLight = true),
+    GENERIC("this device", labelRes = R.string.device_generic, aspect = 0.465f, lensCount = 3, hasHiLight = true),
     ;
 
     companion object {
@@ -88,24 +95,22 @@ fun DeviceHero(
         label = "bloom",
     )
 
+    // Assembled before the modifier chain because a semantics block is not a composable scope, so
+    // stringResource cannot be called inside it.
+    val modelName = profile.labelRes?.let { stringResource(it) } ?: profile.label
+    val doing = when {
+        !profile.hasHiLight -> stringResource(R.string.hero_no_array)
+        !active -> stringResource(R.string.hero_array_off)
+        else -> stringResource(R.string.hero_showing, stringResource(pattern.labelRes))
+    }
+    val description = stringResource(R.string.hero_description, modelName, doing)
+
     Box(
         modifier
             .fillMaxWidth()
             .height(heightDp.dp)
-            .clip(RoundedCornerShape(26.dp))
-            .semantics {
-                contentDescription = buildString {
-                    append(profile.label)
-                    append(", camera bar with the HiLight array. ")
-                    append(
-                        when {
-                            !profile.hasHiLight -> "This model has no HiLight array."
-                            !active -> "The array is off."
-                            else -> "Showing ${pattern.label}."
-                        }
-                    )
-                }
-            },
+            .clip(RoundedCornerShape(26.dp))           // the device is cropped by the card edge
+            .semantics { contentDescription = description },
     ) {
         Canvas(Modifier.fillMaxWidth().height(heightDp.dp)) {
             drawRect(Stage)
@@ -382,8 +387,9 @@ fun LedStrip(
     heightDp: Int = 40,
 ) {
     val frame = rememberLedFrame(pattern, cfg, active)
-    val label = if (active) "Preview of ${pattern.label} across eight LEDs"
-    else "Preview off: ${pattern.label}"
+    val patternName = stringResource(pattern.labelRes)
+    val label = if (active) stringResource(R.string.hero_strip_preview, patternName)
+    else stringResource(R.string.hero_strip_off, patternName)
     Canvas(
         modifier
             .fillMaxWidth()

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Languages HiLight Studio ships. Declaring them here is what puts HiLight in Android's own
+    per-app language list, so a user can read the app in Japanese while the rest of the phone stays
+    in English, without the app needing a language setting of its own.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android"
+    android:defaultLocale="en">
+    <locale android:name="en" />
+    <locale android:name="ja" />
+</locale-config>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Japanese. English source quoted above each entry. See docs/i18n/ja-glossary.md. -->
+<resources>
+
+    <!-- Top bar -->
+    <!-- "%1$d LEDs · %2$s" -->
+    <string name="main_connected_pill">LED %1$d 個 · %2$s</string>
+    <!-- "not connected" -->
+    <string name="main_not_connected">未接続</string>
+
+    <!-- Spoken descriptions of the device illustration. Read aloud rather than seen, so they are full
+         sentences and can be longer than a label would be. -->
+    <!-- "%1$s, camera bar with the HiLight array. %2$s" -->
+    <string name="hero_description">%1$s、HiLight の LED アレイがあるカメラバーです。%2$s</string>
+    <!-- "This model has no HiLight array." -->
+    <string name="hero_no_array">この機種に HiLight の LED アレイはありません。</string>
+    <!-- "The array is off." -->
+    <string name="hero_array_off">LED アレイはオフです。</string>
+    <!-- "Showing %1$s." -->
+    <string name="hero_showing">%1$s を表示しています。</string>
+    <!-- "Preview of %1$s across eight LEDs" -->
+    <string name="hero_strip_preview">%1$s のプレビュー、LED 8 個</string>
+    <!-- "Preview off: %1$s" -->
+    <string name="hero_strip_off">プレビューはオフです: %1$s</string>
+
+</resources>

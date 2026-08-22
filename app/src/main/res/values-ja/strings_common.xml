@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Japanese. The English source is quoted above each entry so a reviewer never has to hold two files
+    open at once. Terms are fixed by docs/i18n/ja-glossary.md — HiLight, Shizuku, ADB and LED stay in
+    Latin script, and Android's own Japanese is followed for 通知, サイレントモード and
+    バッテリーセーバー.
+
+    Register: polite-neutral です・ます for anything addressed to the reader; labels and buttons are
+    noun phrases with no full stop. Several of these appear inside pills and segmented buttons, so the
+    shorter of two acceptable renderings is always the one chosen.
+-->
+<resources>
+
+    <!-- Tabs. Kept to two or three characters each: four of them share the width of the screen. -->
+    <!-- "Live" -->
+    <string name="tab_live">ライブ</string>
+    <!-- "Style" -->
+    <string name="tab_style">スタイル</string>
+    <!-- "Apps" -->
+    <string name="tab_apps">アプリ</string>
+    <!-- "Setup" -->
+    <string name="tab_setup">設定</string>
+
+    <!-- Patterns -->
+    <!-- "Off" -->
+    <string name="pattern_off">オフ</string>
+    <!-- "Solid" -->
+    <string name="pattern_solid">点灯</string>
+    <!-- "Gradient" -->
+    <string name="pattern_gradient">グラデーション</string>
+    <!-- "Breathe" -->
+    <string name="pattern_breathe">呼吸</string>
+    <!-- "Blink" -->
+    <string name="pattern_blink">点滅</string>
+    <!-- "Pulse" -->
+    <string name="pattern_pulse">パルス</string>
+    <!-- "Chase" -->
+    <string name="pattern_chase">追いかけ</string>
+    <!-- "Comet" -->
+    <string name="pattern_comet">コメット</string>
+    <!-- "Wave" -->
+    <string name="pattern_wave">ウェーブ</string>
+    <!-- "Rainbow" -->
+    <string name="pattern_rainbow">レインボー</string>
+    <!-- "Rainbow" — the narrow form, for tiles and fill buttons where レインボー wraps and clips -->
+    <string name="pattern_rainbow_short">虹</string>
+    <!-- "Random colours" -->
+    <string name="pattern_random">ランダムな色</string>
+    <!-- "Per-LED custom" -->
+    <string name="pattern_custom">LED ごとに設定</string>
+
+    <!-- What one cycle of each pattern means -->
+    <!-- "One full breath: dim up to full, back down." -->
+    <string name="cycle_breathe">ひと呼吸分です。暗い状態から最大まで明るくなり、また暗くなります。</string>
+    <!-- "One on-off pair — lit for the first half." -->
+    <string name="cycle_blink">点灯と消灯の 1 組です。前半が点灯です。</string>
+    <!-- "One flash: snap to full, then fade away." -->
+    <string name="cycle_pulse">1 回の閃光です。一気に最大まで明るくなり、そのまま消えていきます。</string>
+    <!-- "One lap of a single lit LED around all eight." -->
+    <string name="cycle_chase">点灯した 1 個の LED が 8 個を 1 周します。</string>
+    <!-- "One lap of the comet head, its tail trailing 3 LEDs." -->
+    <string name="cycle_comet">コメットの先頭が 1 周します。尾は LED 3 個分です。</string>
+    <!-- "One wave travelling once across the array." -->
+    <string name="cycle_wave">波が LED アレイを 1 回横切ります。</string>
+    <!-- "One trip through every hue, back to the start." -->
+    <string name="cycle_rainbow">すべての色相を一巡して元に戻ります。</string>
+
+    <!-- Why the array is being held dark -->
+    <!-- "Quiet hours" -->
+    <string name="suppression_quiet_hours">サイレント時間</string>
+    <!-- "Low battery" -->
+    <string name="suppression_low_battery">電池残量が少ない</string>
+    <!-- "Battery Saver" — Android's own Japanese for the system feature -->
+    <string name="suppression_power_saver">バッテリーセーバー</string>
+    <!-- "Screen-off only" -->
+    <string name="suppression_screen_on">画面消灯時のみ</string>
+
+    <!-- How the renderer is reached -->
+    <!-- "Auto" -->
+    <string name="transport_auto">自動</string>
+    <!-- "Shizuku" — product name, not translated -->
+    <string name="transport_shizuku">Shizuku</string>
+    <!-- "ADB helper" -->
+    <string name="transport_adb">ADB ヘルパー</string>
+
+    <!-- Durations. Japanese puts the unit straight after the number with no space, which is why these
+         are resources rather than concatenation. -->
+    <!-- "%1$dms" -->
+    <string name="duration_ms">%1$dミリ秒</string>
+    <!-- "%1$ss" -->
+    <string name="duration_seconds_fraction">%1$s秒</string>
+    <!-- "%1$ds" -->
+    <string name="duration_seconds">%1$d秒</string>
+    <!-- "%1$dm" -->
+    <string name="duration_minutes">%1$d分</string>
+    <!-- "%1$dm %2$ds" -->
+    <string name="duration_minutes_seconds">%1$d分%2$d秒</string>
+
+    <!-- Buttons and labels used on more than one screen -->
+    <!-- "Cancel" -->
+    <string name="common_cancel">キャンセル</string>
+    <!-- "Save" -->
+    <string name="common_save">保存</string>
+    <!-- "Close" -->
+    <string name="common_close">閉じる</string>
+    <!-- "Edit" -->
+    <string name="common_edit">編集</string>
+    <!-- "Test" -->
+    <string name="common_test">テスト</string>
+    <!-- "Delete" -->
+    <string name="common_delete">削除</string>
+    <!-- "Continue" -->
+    <string name="common_continue">続行</string>
+    <!-- "Keep it short" — declining the longer duration, so it reads as "leave it as it is" -->
+    <string name="common_keep_it_short">短いままにする</string>
+    <!-- "none" — stands in for a field the app left empty, so it is lower case in English -->
+    <string name="common_none">なし</string>
+    <!-- "I understand" -->
+    <string name="common_i_understand">理解しました</string>
+    <!-- "off" -->
+    <string name="common_off_lowercase">オフ</string>
+    <!-- "%1$d%%" -->
+    <string name="common_percent">%1$d%%</string>
+
+    <!-- Said of a phone HiLight has no drawing for, in place of a model name -->
+    <!-- "this device" -->
+    <string name="device_generic">この端末</string>
+
+</resources>

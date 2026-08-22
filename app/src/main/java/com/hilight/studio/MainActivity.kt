@@ -1,6 +1,7 @@
 package com.hilight.studio
 
 import android.os.Bundle
+import androidx.annotation.StringRes
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -50,6 +51,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -97,11 +99,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Tab(val label: String, val icon: ImageVector) {
-    LIVE("Live", Icons.Rounded.Lightbulb),
-    AMBIENT("Style", Icons.Rounded.Tune),
-    APPS("Apps", Icons.Rounded.Apps),
-    SETUP("Setup", Icons.Rounded.DisplaySettings),
+private enum class Tab(@StringRes val labelRes: Int, val icon: ImageVector) {
+    LIVE(R.string.tab_live, Icons.Rounded.Lightbulb),
+    AMBIENT(R.string.tab_style, Icons.Rounded.Tune),
+    APPS(R.string.tab_apps, Icons.Rounded.Apps),
+    SETUP(R.string.tab_setup, Icons.Rounded.DisplaySettings),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -141,8 +143,15 @@ private fun App(store: Store) {
                 },
                 actions = {
                     LivePill(
-                        text = if (status.alive) "${status.ledCount} LEDs · ${active.label}"
-                        else "not connected",
+                        text = if (status.alive) {
+                            stringResource(
+                                R.string.main_connected_pill,
+                                status.ledCount,
+                                stringResource(active.labelRes),
+                            )
+                        } else {
+                            stringResource(R.string.main_not_connected)
+                        },
                         ok = status.alive,
                         modifier = Modifier.padding(end = 16.dp),
                     )
@@ -159,8 +168,8 @@ private fun App(store: Store) {
                             if (tab != t) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             tabIndex = t.ordinal
                         },
-                        icon = { Icon(t.icon, contentDescription = t.label) },
-                        label = { Text(t.label) },
+                        icon = { Icon(t.icon, contentDescription = stringResource(t.labelRes)) },
+                        label = { Text(stringResource(t.labelRes)) },
                         alwaysShowLabel = true,
                     )
                 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 val PRESET_COLORS = listOf(
@@ -38,7 +39,13 @@ val PRESET_COLORS = listOf(
 ).map { it.toInt() }
 
 @Composable
-fun ColorPicker(color: Int, onColor: (Int) -> Unit, label: String = "Colour") {
+fun ColorPicker(
+    color: Int,
+    onColor: (Int) -> Unit,
+    // Callers editing a named colour pass their own heading, so this stays a String. The default is
+    // read from resources, which a composable default expression is allowed to do.
+    label: String = stringResource(R.string.widget_colour),
+) {
     val hsv = FloatArray(3).also { android.graphics.Color.colorToHSV(color, it) }
     val haptics = LocalHapticFeedback.current
 
@@ -119,12 +126,12 @@ fun ColorPicker(color: Int, onColor: (Int) -> Unit, label: String = "Colour") {
             )
         }
 
-        PixelSlider("Saturation", hsv[1], 0f..1f, { s ->
+        PixelSlider(stringResource(R.string.widget_saturation), hsv[1], 0f..1f, { s ->
             onColor(android.graphics.Color.HSVToColor(floatArrayOf(hsv[0], s, hsv[2])))
-        }) { "${(it * 100).toInt()}%" }
-        PixelSlider("Intensity", hsv[2], 0.05f..1f, { v ->
+        }) { stringResource(R.string.widget_percent, (it * 100).toInt()) }
+        PixelSlider(stringResource(R.string.widget_intensity), hsv[2], 0.05f..1f, { v ->
             onColor(android.graphics.Color.HSVToColor(floatArrayOf(hsv[0], hsv[1], v)))
-        }) { "${(it * 100).toInt()}%" }
+        }) { stringResource(R.string.widget_percent, (it * 100).toInt()) }
     }
 }
 
