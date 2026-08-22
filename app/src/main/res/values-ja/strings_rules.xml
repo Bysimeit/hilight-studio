@@ -260,5 +260,28 @@
         <item quantity="other">%1$d日前</item>
     </plurals>
 
-</resources>
+    <!-- 通話の二つの状態と、ルールが消灯のままになる理由。 -->
+    <string name="rules_call_ringing">着信</string>
+    <string name="rules_call_ringing_active">着信音が鳴っている間</string>
+    <string name="rules_call_ringing_idle">着信時に LED アレイは点灯しません</string>
+    <string name="rules_call_connected">通話中</string>
+    <string name="rules_call_connected_active">通話が続いている間</string>
+    <string name="rules_call_connected_idle">通話中に LED アレイは点灯しません</string>
+    <string name="rules_call_hold">通話が終わるまで点灯し続ける</string>
+    <string name="rules_call_duty_warning">LED アレイを点灯できるのは、どの 10 分間でもその半分までです。長い通話はこの枚を使い切るため、回復するまでその後のルールはすべて消灯のままになります。</string>
+    <string name="rules_duration_for">%1$s 間</string>
 
+    <string name="rules_usage_needed_title">使用状況へのアクセスが必要</string>
+    <string name="rules_usage_needed_body">「表示中」のルールは、どのアプリが手前にあるかを HiLight が見られるようになるまで消灯のままです。HiLight Studio に使用状況へのアクセスを許可してから、ここに戻ってください。</string>
+    <string name="rules_notif_needed_title">通知へのアクセスが必要</string>
+    <string name="rules_notif_needed_body">「通知時」のルールは、通知を HiLight が見られるようになるまで消灯のままです。HiLight Studio に通知へのアクセスを許可してから、ここに戻ってください。</string>
+    <string name="rules_needed_pill">許可が必要</string>
+
+    <string name="rules_resting_title">LED 休止中</string>
+    <string name="rules_resting_pill">休止中</string>
+    <string name="rules_resting_body">直近 10 分のうち半分以上点灯していたため、LED アレイが冷却しています。この時間枠が入れ替わるまでルールは消灯のままです。長い通話をずっと点灯させた場合が主な原因です。</string>
+
+    <string name="rules_off_title">HiLight がオフです</string>
+    <string name="rules_off_pill">オフ</string>
+    <string name="rules_off_body">ルールは HiLight がオンの間だけ動きます。ライブタブからオンにしてください。</string>
+</resources>
