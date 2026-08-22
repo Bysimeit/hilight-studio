@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Strings shared across screens: the pattern and guard vocabularies, the tabs, and the units.
+
+    Split into several files under res/values because Android merges them all, and one file per area
+    keeps unrelated work out of each other's way. Names are prefixed by area for the same reason.
+
+    Two rules for anyone adding to these files. Every format string uses positional arguments
+    (%1$s, not %s), because Japanese puts them in a different order from English. And nothing that is
+    not shown to a person belongs here: log lines, JSON keys, package names and the adb command text
+    are all deliberately left as literals in code.
+-->
+<resources>
+
+    <!-- Tabs -->
+    <string name="tab_live">Live</string>
+    <string name="tab_style">Style</string>
+    <string name="tab_apps">Apps</string>
+    <string name="tab_setup">Setup</string>
+
+    <!-- Patterns -->
+    <string name="pattern_off">Off</string>
+    <string name="pattern_solid">Solid</string>
+    <string name="pattern_gradient">Gradient</string>
+    <string name="pattern_breathe">Breathe</string>
+    <string name="pattern_blink">Blink</string>
+    <string name="pattern_pulse">Pulse</string>
+    <string name="pattern_chase">Chase</string>
+    <string name="pattern_comet">Comet</string>
+    <string name="pattern_wave">Wave</string>
+    <string name="pattern_rainbow">Rainbow</string>
+    <!-- Shown where a pattern name gets a third of a row: the Live tab's effect tiles and the
+         per-LED fill buttons. Same word in English; Japanese needs a shorter one. -->
+    <string name="pattern_rainbow_short">Rainbow</string>
+    <string name="pattern_random">Random colours</string>
+    <string name="pattern_custom">Per-LED custom</string>
+
+    <!-- What one cycle of each pattern means -->
+    <string name="cycle_breathe">One full breath: dim up to full, back down.</string>
+    <string name="cycle_blink">One on-off pair — lit for the first half.</string>
+    <string name="cycle_pulse">One flash: snap to full, then fade away.</string>
+    <string name="cycle_chase">One lap of a single lit LED around all eight.</string>
+    <string name="cycle_comet">One lap of the comet head, its tail trailing 3 LEDs.</string>
+    <string name="cycle_wave">One wave travelling once across the array.</string>
+    <string name="cycle_rainbow">One trip through every hue, back to the start.</string>
+
+    <!-- Why the array is being held dark -->
+    <string name="suppression_quiet_hours">Quiet hours</string>
+    <string name="suppression_low_battery">Low battery</string>
+    <string name="suppression_power_saver">Battery Saver</string>
+    <string name="suppression_screen_on">Screen-off only</string>
+
+    <!-- How the renderer is reached -->
+    <string name="transport_auto">Auto</string>
+    <string name="transport_shizuku">Shizuku</string>
+    <string name="transport_adb">ADB helper</string>
+
+    <!-- Durations. Kept as separate forms rather than built by concatenation, because the unit does
+         not simply follow the number in every language. -->
+    <string name="duration_ms">%1$dms</string>
+    <string name="duration_seconds_fraction">%1$ss</string>
+    <string name="duration_seconds">%1$ds</string>
+    <string name="duration_minutes">%1$dm</string>
+    <string name="duration_minutes_seconds">%1$dm %2$ds</string>
+
+    <!-- Buttons and labels used on more than one screen -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_close">Close</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_test">Test</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_keep_it_short">Keep it short</string>
+    <string name="common_none">none</string>
+    <string name="common_i_understand">I understand</string>
+    <string name="common_off_lowercase">off</string>
+    <string name="common_percent">%1$d%%</string>
+
+    <!-- Said of a phone HiLight has no drawing for, in place of a model name -->
+    <string name="device_generic">this device</string>
+
+</resources>

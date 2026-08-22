@@ -39,14 +39,18 @@ class HiLightTile : TileService() {
         val on = store.enabled.value
 
         tile.state = if (on && status.alive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        tile.label = "HiLight"
+        // A TileService is a Context of its own, so the strings come from getString rather than from
+        // stringResource: there is no composition out here, and no Activity to borrow one from. The
+        // panel calls onStartListening every time it opens, so a language change is picked up the
+        // next time the tile is shown.
+        tile.label = getString(R.string.tile_label)
         tile.subtitle = when {
-            store.suppression.value != null -> store.suppression.value!!.short
-            !status.alive -> "No renderer"
-            !on -> "Off"
-            status.resting -> "Resting"
-            status.ambientHeld -> "Timed out"
-            else -> store.ambient.value.pattern.label
+            store.suppression.value != null -> getString(store.suppression.value!!.shortRes)
+            !status.alive -> getString(R.string.tile_no_renderer)
+            !on -> getString(R.string.tile_off)
+            status.resting -> getString(R.string.tile_resting)
+            status.ambientHeld -> getString(R.string.tile_timed_out)
+            else -> getString(store.ambient.value.pattern.labelRes)
         }
         tile.updateTile()
     }

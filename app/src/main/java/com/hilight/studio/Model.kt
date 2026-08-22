@@ -1,26 +1,53 @@
 package com.hilight.studio
 
+import androidx.annotation.StringRes
 import org.json.JSONArray
 import org.json.JSONObject
 
+/**
+ * Patterns the renderer understands.
+ *
+ * [cycleMeaningRes] spells out what one "cycle" is for each pattern, because it means something
+ * different every time. [usesSpeed] is false for the patterns whose maths ignore speedMs entirely —
+ * those must not show a cycle slider that does nothing.
+ *
+ * The labels are resource ids rather than strings because this enum is read from the renderer's state
+ * layer and from a Quick Settings tile as well as from Compose, and none of those has a Context to
+ * resolve a string with at the point the enum is declared.
+ */
 enum class Pattern(
     val key: String,
-    val label: String,
+    @StringRes val labelRes: Int,
     val usesSpeed: Boolean = true,
-    val cycleMeaning: String? = null,
+    @StringRes val cycleMeaningRes: Int? = null,
+    /**
+     * Set only where the full name does not fit a narrow control.
+     *
+     * The Live tab's effect tiles and the per-LED fill buttons give a pattern a third of a row, which
+     * "Rainbow" survives and レインボー does not — it wraps and then clips. Read through
+     * [shortLabelRes], which falls back to the full name.
+     */
+    @StringRes private val narrowLabelRes: Int? = null,
 ) {
-    OFF("off", "Off", usesSpeed = false),
-    SOLID("solid", "Solid", usesSpeed = false),
-    GRADIENT("gradient", "Gradient", usesSpeed = false),
-    BREATHE("breathe", "Breathe", cycleMeaning = "One full breath: dim up to full, back down."),
-    BLINK("blink", "Blink", cycleMeaning = "One on-off pair — lit for the first half."),
-    PULSE("pulse", "Pulse", cycleMeaning = "One flash: snap to full, then fade away."),
-    CHASE("chase", "Chase", cycleMeaning = "One lap of a single lit LED around all eight."),
-    COMET("comet", "Comet", cycleMeaning = "One lap of the comet head, its tail trailing 3 LEDs."),
-    WAVE("wave", "Wave", cycleMeaning = "One wave travelling once across the array."),
-    RAINBOW("rainbow", "Rainbow", cycleMeaning = "One trip through every hue, back to the start."),
-    RANDOM("random", "Random colours", usesSpeed = false),
-    CUSTOM("custom", "Per-LED custom", usesSpeed = false);
+    OFF("off", R.string.pattern_off, usesSpeed = false),
+    SOLID("solid", R.string.pattern_solid, usesSpeed = false),
+    GRADIENT("gradient", R.string.pattern_gradient, usesSpeed = false),
+    BREATHE("breathe", R.string.pattern_breathe, cycleMeaningRes = R.string.cycle_breathe),
+    BLINK("blink", R.string.pattern_blink, cycleMeaningRes = R.string.cycle_blink),
+    PULSE("pulse", R.string.pattern_pulse, cycleMeaningRes = R.string.cycle_pulse),
+    CHASE("chase", R.string.pattern_chase, cycleMeaningRes = R.string.cycle_chase),
+    COMET("comet", R.string.pattern_comet, cycleMeaningRes = R.string.cycle_comet),
+    WAVE("wave", R.string.pattern_wave, cycleMeaningRes = R.string.cycle_wave),
+    RAINBOW(
+        "rainbow", R.string.pattern_rainbow, cycleMeaningRes = R.string.cycle_rainbow,
+        narrowLabelRes = R.string.pattern_rainbow_short,
+    ),
+    RANDOM("random", R.string.pattern_random, usesSpeed = false),
+    CUSTOM("custom", R.string.pattern_custom, usesSpeed = false);
+
+    /** The name to show where a third of a row is all there is. */
+    @get:StringRes
+    val shortLabelRes: Int get() = narrowLabelRes ?: labelRes
 
     companion object {
         fun of(key: String) = entries.firstOrNull { it.key == key } ?: SOLID
@@ -112,10 +139,43 @@ data class AppRule(
     val onlyWhenScreenOff: Boolean = false,
 
     val keyword: String = "",
+    /**
+     * Per-conversation rules — "green when Sujay messages on WhatsApp".
+     *
+     * [conversationKey] is the notification's `shortcutId`, the stable per-chat id. It is filled in
+     * the first time a matching notification is seen, even for a rule created from the contact
+     * picker, after which renaming the contact can no longer break the rule. [conversationName] is
+     * the fallback for apps that set no shortcutId, and what the card shows.
+     */
+    val conversationKey: String? = null,
+    val conversationName: String? = null,
+    /** also fire when this person speaks inside a group, not only in their own chat */
+    val includeGroups: Boolean = false,
+    /**
+     * Whether the chat this rule was made from is itself a group.
+     *
+     * Carried on the rule rather than looked up, because the learned-chat list is capped and a rule
+     * made from the contact picker was never in it at all — so the card had no way to tell a group
+     * from a person, and the editor could not explain why the "also in groups" switch is irrelevant
+     * for a rule that already names a group.
+     */
+    val conversationIsGroup: Boolean = false,
 ) {
     val isCall: Boolean get() = trigger == Trigger.RINGING || trigger == Trigger.CALL
 
     val isCatchAll: Boolean get() = pkg == ANY_APP && !isCall
+
+    /** True for a rule scoped to one chat rather than to a whole app. */
+    val isConversationRule: Boolean
+        get() = !conversationKey.isNullOrBlank() || !conversationName.isNullOrBlank()
+
+    /**
+     * Identity for storage.
+     *
+     * Package plus trigger used to be enough, but an app can now hold several rules — one per
+     * conversation, plus a plain one for everything else — so the conversation has to be part of it.
+     */
+    val id: String get() = "$pkg|${trigger.name}|${conversationKey ?: conversationName ?: ""}"
 
     fun toPrefsJson(): JSONObject = JSONObject().apply {
         put("pkg", pkg)
@@ -130,6 +190,10 @@ data class AppRule(
         put("brightness", brightness.toDouble())
         put("onlyWhenScreenOff", onlyWhenScreenOff)
         put("keyword", keyword)
+        conversationKey?.let { put("conversationKey", it) }
+        conversationName?.let { put("conversationName", it) }
+        put("includeGroups", includeGroups)
+        put("conversationIsGroup", conversationIsGroup)
     }
 
     companion object {
@@ -173,6 +237,10 @@ data class AppRule(
             brightness = o.optDouble("brightness", 1.0).toFloat(),
             onlyWhenScreenOff = o.optBoolean("onlyWhenScreenOff", false),
             keyword = o.optString("keyword", ""),
+            conversationKey = o.optString("conversationKey", "").takeIf { it.isNotEmpty() },
+            conversationName = o.optString("conversationName", "").takeIf { it.isNotEmpty() },
+            includeGroups = o.optBoolean("includeGroups", false),
+            conversationIsGroup = o.optBoolean("conversationIsGroup", false),
         )
     }
 }
@@ -191,11 +259,12 @@ data class Preset(val name: String, val ambient: Ambient) {
     }
 }
 
-enum class Suppression(val short: String) {
-    QUIET_HOURS("Quiet hours"),
-    LOW_BATTERY("Low battery"),
-    POWER_SAVER("Battery Saver"),
-    SCREEN_ON("Screen-off only"),
+/** Why the array is being held dark despite the master switch being on. */
+enum class Suppression(@StringRes val shortRes: Int) {
+    QUIET_HOURS(R.string.suppression_quiet_hours),
+    LOW_BATTERY(R.string.suppression_low_battery),
+    POWER_SAVER(R.string.suppression_power_saver),
+    SCREEN_ON(R.string.suppression_screen_on),
 }
 
 object Limits {

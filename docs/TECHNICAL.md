@@ -173,6 +173,52 @@ a test stopping the moment the app went to the background.
 What still cannot be measured here: actual power draw and LED junction temperature. Android does not
 attribute either per-LED, so these figures are conservative by design rather than tuned to data.
 
+## Per-contact rules
+
+A rule can be scoped to one chat, so a message from one person lights a colour of their own. Nothing
+about this needs a new permission: the sender's name is inside the notification the listener already
+receives.
+
+`NotificationPeek.read` turns a `StatusBarNotification` into a `MessageInfo`, and
+`ConversationMatch` decides which rule that notification belongs to. The matcher is a ladder, tried
+strongest first:
+
+| Rung | Source | Survives a rename? |
+|---|---|---|
+| `KEY` | `Notification.shortcutId`, the app's own stable per-chat id | Yes |
+| `NAME` | MessagingStyle sender, group title, or the notification title, normalised | No |
+| `CONTAINS` | the rule's name inside the notification title, for apps that pack extra text in — Discord's `Sujay (#general, Server)` | No |
+
+Two keys present and unequal means a different chat, so a key mismatch beats any name similarity.
+Names are compared with case, punctuation and emoji stripped, because WhatsApp shows exactly what is
+in the address book and a contact saved as `Sujay (work)` would otherwise never match. A rule created
+from a name records the chat's `shortcutId` the first time it matches, after which renaming cannot
+break it.
+
+Resolution is most-specific-first: a conversation rule for the app, then a conversation rule on the
+"any app" sentinel (the same person across WhatsApp and SMS), then the app's plain rule, then the
+catch-all.
+
+Things learned from the framework rather than assumed, both of which would have shipped bugs:
+
+- `NotificationCompat.MessagingStyle.extractMessagingStyleFromNotification` returns a
+  `conversationTitle` for **one-to-one** chats too, because androidx writes the title into a hidden
+  extra unconditionally and restores from it when the visible `EXTRA_CONVERSATION_TITLE` is absent.
+  Reading it directly would mark ordinary chats as groups, and a person rule is refused inside a group
+  unless it opted in — so every per-contact rule would have stayed dark. The group question is settled
+  from `EXTRA_IS_GROUP_CONVERSATION`, or the visible extra, and nothing else.
+- Messaging apps re-post the *same* notification on every change to the conversation, so a chat is
+  ignored unless it carries a newer message stamp than the last one handled for that notification key.
+  Group summaries (`FLAG_GROUP_SUMMARY`) are dropped outright, or a bundled app would flash twice and
+  the summary's text would match a rule naming any one member.
+
+Per-app coverage is uneven, and honestly so: WhatsApp, Google Messages and Telegram give a
+`shortcutId` and a named `Person`; Slack gives MessagingStyle on recent versions and a title on older
+ones; Discord gives neither, so only the title path works; and Signal with message content hidden
+gives no sender at all, which no amount of code can recover. The **notification inspector** under
+Setup exists for exactly this — it shows what was extracted from each notification, and can be copied
+or shared without ever including message text.
+
 ## Known limits
 
 - Privileged access has to be re-established after every reboot. Built-in access does this itself

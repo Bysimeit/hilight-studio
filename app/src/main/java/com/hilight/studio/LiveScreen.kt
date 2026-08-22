@@ -9,8 +9,10 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Bolt
@@ -30,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
@@ -48,20 +51,37 @@ private fun SafetyState(status: HelperStatus) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         when {
             status.resting ->
-                Caption("Resting to protect the LEDs — they have been lit too much recently.")
+                Caption(stringResource(R.string.live_safety_resting))
             status.ambientHeld || remaining == 0L ->
-                Caption("Auto-off reached. Change the style or flip the switch to light it again.")
+                Caption(stringResource(R.string.live_safety_timed_out))
             else ->
-                Caption("Auto-off in ${remaining / 1000}s · duty used ${status.dutyPct}%")
+                Caption(
+                    stringResource(R.string.live_safety_countdown, remaining / 1000, status.dutyPct)
+                )
         }
-        Caption("renderer pid ${status.pid} · ${if (status.sessionOpen) "session open" else "session closed"}")
+        Caption(
+            stringResource(
+                R.string.live_renderer_pid,
+                status.pid,
+                stringResource(
+                    if (status.sessionOpen) R.string.live_session_open
+                    else R.string.live_session_closed
+                ),
+            )
+        )
     }
 }
 
+/**
+ * White-light effects have no colour of their own, so give their tiles a readable accent.
+ *
+ * Keyed on the pattern rather than on the tile's label, which is translated now: comparing a label
+ * against the English word "Rainbow" would have picked the wrong accent in every other language.
+ */
 @Composable
-private fun tileAccent(label: String, color: Int): Color = when {
+private fun tileAccent(pattern: Pattern, color: Int): Color = when {
     color != 0xFFFFFFFF.toInt() -> Color(color)
-    label == "Rainbow" -> Color(0xFF7C4DFF)
+    pattern == Pattern.RAINBOW -> Color(0xFF7C4DFF)
     else -> Color(0xFFFFB300)
 }
 
@@ -75,6 +95,8 @@ fun LiveScreen(store: Store) {
     val previewLook by store.previewLook.collectAsStateWithLifecycle()
 
     val profile = rememberDeviceProfile()
+    // A real model name is not translated; only the fallback profile has a resource to read.
+    val modelName = profile.labelRes?.let { stringResource(it) } ?: profile.label
 
     PixelCard(tone = 0) {
         val shown = previewLook ?: ambient
@@ -91,41 +113,57 @@ fun LiveScreen(store: Store) {
         ) {
             Text(
                 when {
-                    !profile.hasHiLight -> "HiLight not available"
-                    previewLook != null -> "Testing · ${shown.pattern.label}"
-                    enabled -> "HiLight · ${ambient.pattern.label}"
-                    else -> "HiLight is with the system"
+                    !profile.hasHiLight -> stringResource(R.string.live_status_unavailable)
+                    previewLook != null -> stringResource(
+                        R.string.live_status_testing,
+                        stringResource(shown.pattern.labelRes),
+                    )
+                    enabled -> stringResource(
+                        R.string.live_status_on,
+                        stringResource(ambient.pattern.labelRes),
+                    )
+                    else -> stringResource(R.string.live_status_system)
                 },
                 style = MaterialTheme.typography.titleMedium,
+                // Weighted so the status line is the thing that wraps. Unweighted, both children
+                // competed for the row and Japanese — where this line runs half again as long as the
+                // English — squeezed the model name into a two-line sliver against the edge.
+                modifier = Modifier.weight(1f, fill = false),
             )
-            Caption(profile.label)
+            Spacer(Modifier.width(8.dp))
+            Caption(modelName)
         }
         Caption(
             when {
                 !profile.hasHiLight ->
-                    "${profile.label} has no HiLight array — the feature is Pro-only."
-                !status.alive -> "Connect a renderer in Setup to drive the array."
-                enabled -> "Turn the phone over to see it for real."
-                else -> "Take over the array with the switch below."
+                    stringResource(R.string.live_hint_no_array, modelName)
+                !status.alive -> stringResource(R.string.live_hint_no_renderer)
+                enabled -> stringResource(R.string.live_hint_look)
+                else -> stringResource(R.string.live_hint_take_over)
             }
         )
     }
 
     PixelCard(tone = 2) {
         PixelToggleRow(
-            title = if (enabled) "Driving HiLight" else "System has HiLight",
+            title = stringResource(
+                if (enabled) R.string.live_toggle_driving else R.string.live_toggle_system
+            ),
             subtitle = null,
             checked = enabled,
             onChange = { store.setEnabled(it) },
         )
         suppression?.let {
+            // The full explanation, not the tile's two-word form in Suppression.shortRes.
             Caption(
-                when (it) {
-                    Suppression.QUIET_HOURS -> "Quiet hours: the array stays dark until your window ends."
-                    Suppression.LOW_BATTERY -> "Battery is low, so the array is paused. Charging resumes it."
-                    Suppression.POWER_SAVER -> "Battery Saver is on, so the array is paused."
-                    Suppression.SCREEN_ON -> "Set to light only while the screen is off."
-                }
+                stringResource(
+                    when (it) {
+                        Suppression.QUIET_HOURS -> R.string.live_suppressed_quiet_hours
+                        Suppression.LOW_BATTERY -> R.string.live_suppressed_low_battery
+                        Suppression.POWER_SAVER -> R.string.live_suppressed_power_saver
+                        Suppression.SCREEN_ON -> R.string.live_suppressed_screen_on
+                    }
+                )
             )
         }
         AnimatedVisibility(
@@ -137,30 +175,32 @@ fun LiveScreen(store: Store) {
         }
     }
 
-    val tests: List<Triple<String, ImageVector, Pair<Pattern, Int>>> = listOf(
-        Triple("Rainbow", Icons.Rounded.AutoAwesome, Pattern.RAINBOW to 0xFFFFFFFF.toInt()),
-        Triple("Random", Icons.Rounded.Casino, Pattern.RANDOM to 0xFFFFFFFF.toInt()),
-
-        Triple("Comet", Icons.Rounded.Flare, Pattern.COMET to 0xFF00E5FF.toInt()),
-        Triple("Pulse", Icons.Rounded.Bolt, Pattern.PULSE to 0xFFFF1744.toInt()),
-        Triple("Breathe", Icons.Rounded.Nightlight, Pattern.BREATHE to 0xFF7C4DFF.toInt()),
-        Triple("Wave", Icons.Rounded.Waves, Pattern.WAVE to 0xFF00E676.toInt()),
+    // Each tile borrows its pattern's own name, so the label is a string resource id. Random is the
+    // exception: a third of a row is too narrow for "Random colours".
+    val tests: List<Triple<Int, ImageVector, Pair<Pattern, Int>>> = listOf(
+        Triple(Pattern.RAINBOW.shortLabelRes, Icons.Rounded.AutoAwesome, Pattern.RAINBOW to 0xFFFFFFFF.toInt()),
+        Triple(R.string.live_test_random, Icons.Rounded.Casino, Pattern.RANDOM to 0xFFFFFFFF.toInt()),
+        // tile accents are chosen for legibility; the effect colours themselves are above
+        Triple(Pattern.COMET.shortLabelRes, Icons.Rounded.Flare, Pattern.COMET to 0xFF00E5FF.toInt()),
+        Triple(Pattern.PULSE.shortLabelRes, Icons.Rounded.Bolt, Pattern.PULSE to 0xFFFF1744.toInt()),
+        Triple(Pattern.BREATHE.shortLabelRes, Icons.Rounded.Nightlight, Pattern.BREATHE to 0xFF7C4DFF.toInt()),
+        Triple(Pattern.WAVE.shortLabelRes, Icons.Rounded.Waves, Pattern.WAVE to 0xFF00E676.toInt()),
     )
 
     PixelCard {
-        SectionTitle("Try an effect")
-        Caption("Fires for four seconds on the real LEDs, then returns to your style.")
+        SectionTitle(stringResource(R.string.live_tests_title))
+        Caption(stringResource(R.string.live_tests_caption))
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             tests.chunked(3).forEach { row ->
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    row.forEach { (label, icon, spec) ->
+                    row.forEach { (labelRes, icon, spec) ->
                         PixelTile(
-                            label = label,
+                            label = stringResource(labelRes),
                             icon = icon,
-                            accent = tileAccent(label, spec.second),
+                            accent = tileAccent(spec.first, spec.second),
                             enabled = enabled && status.alive,
                             modifier = Modifier.weight(1f),
                         ) { store.preview(spec.first, spec.second, 1200, 1f) }
@@ -171,9 +211,14 @@ fun LiveScreen(store: Store) {
     }
 
     PixelCard {
-        SectionTitle("App rules", trailing = { Caption("${rules.count { it.enabled }} on") })
+        SectionTitle(
+            stringResource(R.string.live_rules_title),
+            trailing = {
+                Caption(stringResource(R.string.live_rules_on_count, rules.count { it.enabled }))
+            },
+        )
         if (rules.isEmpty()) {
-            Caption("Nothing yet. Add per-app colours in the Apps tab.")
+            Caption(stringResource(R.string.live_rules_empty))
         } else {
             rules.forEach { r ->
                 Row(
@@ -182,11 +227,19 @@ fun LiveScreen(store: Store) {
                         .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(r.label, style = MaterialTheme.typography.bodyLarge)
+                    Text(ruleLabel(r), style = MaterialTheme.typography.bodyLarge)
+                    // One format string rather than three pieces joined with a dot, so a translator
+                    // can put the trigger first if that is the natural order.
                     Text(
-                        (if (r.randomColor) "random" else r.pattern.label) +
-                            " · " +
-                            if (r.trigger == Trigger.NOTIFICATION) "notify" else "in app",
+                        stringResource(
+                            R.string.live_rule_summary,
+                            if (r.randomColor) stringResource(R.string.live_rule_random)
+                            else stringResource(r.pattern.labelRes),
+                            stringResource(
+                                if (r.trigger == Trigger.NOTIFICATION) R.string.live_rule_notify
+                                else R.string.live_rule_in_app
+                            ),
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (r.enabled) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,

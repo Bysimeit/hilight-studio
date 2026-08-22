@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Live tab, the Quick Settings tile, and the colour picker shared by Style and Apps.
+
+    Pattern names, suppression reasons and duration units are in strings_common.xml; nothing here
+    repeats them. As in the other files, every format string uses positional arguments.
+-->
+<resources>
+
+    <!-- Hero card: what HiLight is doing right now. %1$s is the pattern name. -->
+    <string name="live_status_unavailable">HiLight not available</string>
+    <string name="live_status_testing">Testing · %1$s</string>
+    <string name="live_status_on">HiLight · %1$s</string>
+    <string name="live_status_system">HiLight is with the system</string>
+
+    <!-- The line under the hero. %1$s is the model name, or "this device" on a phone HiLight has no
+         drawing for. -->
+    <string name="live_hint_no_array">%1$s has no HiLight array — the feature is Pro-only.</string>
+    <string name="live_hint_no_renderer">Connect a renderer in Setup to drive the array.</string>
+    <string name="live_hint_look">Turn the phone over to see it for real.</string>
+    <string name="live_hint_take_over">Take over the array with the switch below.</string>
+
+    <!-- Master switch -->
+    <string name="live_toggle_driving">Driving HiLight</string>
+    <string name="live_toggle_system">System has HiLight</string>
+
+    <!-- Why the array is dark while the switch is on. These are the full explanations; the two-word
+         forms the tile shows are suppression_* in strings_common.xml. -->
+    <string name="live_suppressed_quiet_hours">Quiet hours: the array stays dark until your window ends.</string>
+    <string name="live_suppressed_low_battery">Battery is low, so the array is paused. Charging resumes it.</string>
+    <string name="live_suppressed_power_saver">Battery Saver is on, so the array is paused.</string>
+    <string name="live_suppressed_screen_on">Set to light only while the screen is off.</string>
+
+    <!-- The safety limits, said out loud so that a dark array never reads as a fault. In the
+         countdown %1$d is the seconds left and %2$d the percentage of the duty allowance spent. The
+         seconds unit is written into the line rather than taken from duration_seconds, which sets it
+         off with a space this line does not want. -->
+    <string name="live_safety_resting">Resting to protect the LEDs — they have been lit too much recently.</string>
+    <string name="live_safety_timed_out">Auto-off reached. Change the style or flip the switch to light it again.</string>
+    <string name="live_safety_countdown">Auto-off in %1$ds · duty used %2$d%%</string>
+
+    <!-- Renderer diagnostics under the countdown. %1$d is the process id, %2$s one of the two
+         session states below. -->
+    <string name="live_renderer_pid">renderer pid %1$d · %2$s</string>
+    <string name="live_session_open">session open</string>
+    <string name="live_session_closed">session closed</string>
+
+    <!-- One-tap effects. The tiles borrow the pattern names from strings_common.xml, except that a
+         third of a row is too narrow for "Random colours". -->
+    <string name="live_tests_title">Try an effect</string>
+    <string name="live_tests_caption">Fires for four seconds on the real LEDs, then returns to your style.</string>
+    <string name="live_test_random">Random</string>
+
+    <!-- The rules list. %1$d is how many rules are on. In the per-rule line %1$s is the colour or
+         pattern and %2$s is what sets the rule off. -->
+    <string name="live_rules_title">App rules</string>
+    <string name="live_rules_on_count">%1$d on</string>
+    <string name="live_rules_empty">Nothing yet. Add per-app colours in the Apps tab.</string>
+    <string name="live_rule_summary">%1$s · %2$s</string>
+    <string name="live_rule_random">random</string>
+    <string name="live_rule_notify">notify</string>
+    <string name="live_rule_in_app">in app</string>
+
+    <!-- Quick Settings tile. Its label is set from the service, not taken from the manifest, because
+         a tile has room for the feature name and not the full app name. tile_off is the state of the
+         array rather than the name of the Off pattern, so it stays a string of its own. -->
+    <string name="tile_label">HiLight</string>
+    <string name="tile_no_renderer">No renderer</string>
+    <string name="tile_off">Off</string>
+    <string name="tile_resting">Resting</string>
+    <string name="tile_timed_out">Timed out</string>
+
+    <!-- The colour picker. widget_colour is the heading it falls back to when a caller does not name
+         the colour it is editing; %1$d in widget_percent is a percentage of full. -->
+    <string name="widget_colour">Colour</string>
+    <string name="widget_saturation">Saturation</string>
+    <string name="widget_intensity">Intensity</string>
+    <string name="widget_percent">%1$d%%</string>
+
+</resources>

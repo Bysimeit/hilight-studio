@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The Style tab: the always-on look, the options each pattern brings with it, the timing sliders,
+    and the presets card that saves a look and moves it between devices.
+
+    Pattern names, the cycle explanations, the duration units and the buttons shared with other
+    screens live in strings_common.xml and are used from there, so that no word is translated twice
+    and the same pattern never ends up with two names.
+
+    Format strings use positional arguments (%1$d, not %d) because Japanese does not keep the English
+    order. Nothing the renderer or the preset JSON parses belongs in this file.
+-->
+<resources>
+
+    <!-- The card that chooses the pattern -->
+    <string name="style_always_on_style">Always-on style</string>
+    <!-- Shown when the master switch is off, so that nothing chosen here reaches the hardware -->
+    <string name="style_control_off_warning">Control is off — turn it on in Live to see this on the hardware.</string>
+
+    <!-- Random colours -->
+    <string name="style_change_every">Change every</string>
+    <string name="style_colour_per_led">A colour per LED</string>
+    <string name="style_fade_between_colours">Fade between colours</string>
+    <string name="style_saturation">Saturation</string>
+
+    <!-- Rainbow -->
+    <string name="style_rainbow_spread">Spread across the array</string>
+    <string name="style_rainbow_spread_off">Off puts every LED on the same hue and cycles them together.</string>
+
+    <!-- Per-LED colours. %1$d is an LED's position in the array, counted from the flash. -->
+    <string name="style_per_led_colours">Per-LED colours</string>
+    <string name="style_per_led_hint">LED 1 sits closest to the flash. Tap one, then pick its colour.</string>
+    <string name="style_led_number">LED %1$d</string>
+    <string name="style_rotate_around_array">Rotate around array</string>
+    <!-- The rotate slider's badge when it is turned right down, so rotation is disabled -->
+    <string name="style_rotate_off">off</string>
+    <!-- Fills the eight LEDs from the Material You scheme, which follows the wallpaper -->
+    <string name="style_wallpaper">Wallpaper</string>
+
+    <!-- The two ends of a gradient -->
+    <string name="style_gradient_start">Start</string>
+    <string name="style_gradient_end">End</string>
+
+    <string name="style_off_body">The array stays dark until an app rule fires.</string>
+
+    <!-- Heading of the colour picker for the patterns that take a single colour -->
+    <string name="style_colour">Colour</string>
+
+    <!-- Timing -->
+    <string name="style_timing">Timing</string>
+    <string name="style_time_per_cycle">Time per cycle</string>
+    <string name="style_shorter_is_faster">Shorter is faster.</string>
+    <string name="style_brightness">Brightness</string>
+    <string name="style_brightness_note">The LEDs have no brightness channel, so this scales the RGB values.</string>
+
+    <!-- Slider badges that read as a percentage. The sign is doubled to survive the formatter. -->
+    <string name="style_percent">%1$d%%</string>
+
+    <!-- Presets: saved looks -->
+    <string name="style_presets">Presets</string>
+    <string name="style_presets_saved">%1$d saved</string>
+    <string name="style_presets_empty">Save the current look to come back to it later.</string>
+    <string name="style_export">Export</string>
+    <string name="style_import">Import</string>
+    <string name="style_name_this_look">Name this look</string>
+    <string name="style_name_field">Name</string>
+    <!-- Stands in when the name field is left empty. %1$d is the next free number, not a count. -->
+    <string name="style_preset_default_name">Preset %1$d</string>
+    <string name="style_paste_exported_presets">Paste exported presets</string>
+    <!-- Label of the field an exported document is pasted into. The format's name, so it stays as it
+         is in every language unless the translator has a local convention for it. -->
+    <string name="style_import_json_field">JSON</string>
+    <string name="style_import_failed">That JSON could not be read</string>
+    <string name="style_import_count">Imported %1$d</string>
+    <!-- Title the system share sheet is given when presets are exported -->
+    <string name="style_export_chooser">Export presets</string>
+
+</resources>

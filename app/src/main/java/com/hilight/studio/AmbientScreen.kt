@@ -46,7 +46,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import android.widget.Toast
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,7 +62,7 @@ fun AmbientScreen(store: Store) {
     PresetsCard(store)
 
     PixelCard(tone = 2) {
-        SectionTitle("Always-on style")
+        SectionTitle(stringResource(R.string.style_always_on_style))
         LedStrip(ambient.pattern, ambient, active = enabled, heightDp = 46)
         PatternCarousel(
             selected = ambient.pattern,
@@ -69,7 +71,7 @@ fun AmbientScreen(store: Store) {
         )
         if (!enabled) {
             Text(
-                "Control is off — turn it on in Live to see this on the hardware.",
+                stringResource(R.string.style_control_off_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -84,38 +86,42 @@ fun AmbientScreen(store: Store) {
         Column {
             when (pattern) {
                 Pattern.RANDOM -> PixelCard {
-                    SectionTitle("Random colours")
+                    SectionTitle(stringResource(R.string.pattern_random))
                     PixelSlider(
-                        "Change every",
+                        stringResource(R.string.style_change_every),
                         ambient.randomIntervalMs.toFloat(),
                         150f..8000f,
                         { store.setAmbient(ambient.copy(randomIntervalMs = it.toInt())) },
-                    ) { "${(it / 100).toInt() / 10f}s" }
-                    ToggleRow("A colour per LED", ambient.randomPerLed) {
+                    ) {
+                        // shown to a tenth of a second, so dragging does not spray digits
+                        val tenths = (it / 100).toInt() / 10f
+                        stringResource(R.string.duration_seconds_fraction, tenths.toString())
+                    }
+                    ToggleRow(stringResource(R.string.style_colour_per_led), ambient.randomPerLed) {
                         store.setAmbient(ambient.copy(randomPerLed = it))
                     }
-                    ToggleRow("Fade between colours", ambient.randomSmooth) {
+                    ToggleRow(stringResource(R.string.style_fade_between_colours), ambient.randomSmooth) {
                         store.setAmbient(ambient.copy(randomSmooth = it))
                     }
                     PixelSlider(
-                        "Saturation",
+                        stringResource(R.string.style_saturation),
                         ambient.randomSaturation,
                         0.2f..1f,
                         { store.setAmbient(ambient.copy(randomSaturation = it)) },
-                    ) { "${(it * 100).toInt()}%" }
+                    ) { stringResource(R.string.style_percent, (it * 100).toInt()) }
                 }
 
                 Pattern.RAINBOW -> PixelCard {
-                    SectionTitle("Rainbow")
-                    ToggleRow("Spread across the array", ambient.rainbowSpread) {
+                    SectionTitle(stringResource(R.string.pattern_rainbow))
+                    ToggleRow(stringResource(R.string.style_rainbow_spread), ambient.rainbowSpread) {
                         store.setAmbient(ambient.copy(rainbowSpread = it))
                     }
-                    Caption("Off puts every LED on the same hue and cycles them together.")
+                    Caption(stringResource(R.string.style_rainbow_spread_off))
                 }
 
                 Pattern.CUSTOM -> PixelCard {
-                    SectionTitle("Per-LED colours")
-                    Caption("LED 1 sits closest to the flash. Tap one, then pick its colour.")
+                    SectionTitle(stringResource(R.string.style_per_led_colours))
+                    Caption(stringResource(R.string.style_per_led_hint))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                         ambient.perLed.forEachIndexed { i, c ->
                             LedSwatch(
@@ -133,14 +139,17 @@ fun AmbientScreen(store: Store) {
                                     perLed = ambient.perLed.toMutableList().also { it[editingLed] = c })
                             )
                         },
-                        label = "LED ${editingLed + 1}",
+                        label = stringResource(R.string.style_led_number, editingLed + 1),
                     )
                     PixelSlider(
-                        "Rotate around array",
+                        stringResource(R.string.style_rotate_around_array),
                         ambient.rotateMs.toFloat(),
                         0f..2000f,
                         { store.setAmbient(ambient.copy(rotateMs = it.toInt())) },
-                    ) { if (it < 50) "off" else "${it.toInt()}ms" }
+                    ) {
+                        if (it < 50) stringResource(R.string.style_rotate_off)
+                        else stringResource(R.string.duration_ms, it.toInt())
+                    }
                     val wallpaper = wallpaperLedColours()
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         FilledTonalButton(
@@ -151,61 +160,65 @@ fun AmbientScreen(store: Store) {
                                 )
                             },
                             modifier = Modifier.weight(1f),
-                        ) { ButtonLabel("Rainbow") }
+                        ) { ButtonLabel(stringResource(Pattern.RAINBOW.shortLabelRes)) }
                         FilledTonalButton(
                             onClick = { store.setAmbient(ambient.copy(perLed = wallpaper)) },
                             modifier = Modifier.weight(1f),
-                        ) { ButtonLabel("Wallpaper") }
+                        ) { ButtonLabel(stringResource(R.string.style_wallpaper)) }
                         FilledTonalButton(
                             onClick = {
                                 store.setAmbient(ambient.copy(perLed = List(LED_COUNT) { ambient.color }))
                             },
                             modifier = Modifier.weight(1f),
-                        ) { ButtonLabel("Solid") }
+                        ) { ButtonLabel(stringResource(R.string.pattern_solid)) }
                     }
                 }
 
                 Pattern.GRADIENT -> PixelCard {
-                    SectionTitle("Gradient")
-                    ColorPicker(ambient.color, { store.setAmbient(ambient.copy(color = it)) }, "Start")
+                    SectionTitle(stringResource(R.string.pattern_gradient))
+                    ColorPicker(
+                        ambient.color,
+                        { store.setAmbient(ambient.copy(color = it)) },
+                        stringResource(R.string.style_gradient_start),
+                    )
                     ColorPicker(
                         ambient.secondColor,
                         { store.setAmbient(ambient.copy(secondColor = it)) },
-                        "End",
+                        stringResource(R.string.style_gradient_end),
                     )
                 }
 
                 Pattern.OFF -> PixelCard {
-                    SectionTitle("Off")
-                    Caption("The array stays dark until an app rule fires.")
+                    SectionTitle(stringResource(R.string.pattern_off))
+                    Caption(stringResource(R.string.style_off_body))
                 }
 
                 else -> PixelCard {
-                    SectionTitle("Colour")
+                    SectionTitle(stringResource(R.string.style_colour))
                     ColorPicker(ambient.color, { store.setAmbient(ambient.copy(color = it)) })
                 }
             }
 
             if (pattern != Pattern.OFF) {
                 PixelCard {
-                    SectionTitle("Timing")
+                    SectionTitle(stringResource(R.string.style_timing))
                     if (pattern.usesSpeed) {
                         PixelSlider(
-                            "Time per cycle",
+                            stringResource(R.string.style_time_per_cycle),
                             ambient.speedMs.toFloat(),
                             150f..8000f,
                             { store.setAmbient(ambient.copy(speedMs = it.toInt())) },
                         ) { formatDuration(it.toInt()) }
-                        pattern.cycleMeaning?.let { Caption(it) }
-                        Caption("Shorter is faster.")
+                        pattern.cycleMeaningRes?.let { Caption(stringResource(it)) }
+                        Caption(stringResource(R.string.style_shorter_is_faster))
                     }
                     PixelSlider(
-                        "Brightness",
+                        stringResource(R.string.style_brightness),
                         ambient.brightness,
                         0.02f..1f,
                         { store.setAmbient(ambient.copy(brightness = it)) },
-                    ) { "${(it * 100).toInt()}%" }
-                    Caption("The LEDs have no brightness channel, so this scales the RGB values.")
+                    ) { stringResource(R.string.style_percent, (it * 100).toInt()) }
+                    Caption(stringResource(R.string.style_brightness_note))
                 }
             }
         }
@@ -222,9 +235,12 @@ private fun PresetsCard(store: Store) {
     var importText by remember { mutableStateOf("") }
 
     PixelCard {
-        SectionTitle("Presets", trailing = { Caption("${presets.size} saved") })
+        SectionTitle(
+            stringResource(R.string.style_presets),
+            trailing = { Caption(stringResource(R.string.style_presets_saved, presets.size)) },
+        )
         if (presets.isEmpty()) {
-            Caption("Save the current look to come back to it later.")
+            Caption(stringResource(R.string.style_presets_empty))
         } else {
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -259,39 +275,46 @@ private fun PresetsCard(store: Store) {
             FilledTonalButton(
                 onClick = { name = ""; naming = true },
                 modifier = Modifier.weight(1f),
-            ) { ButtonLabel("Save") }
+            ) { ButtonLabel(stringResource(R.string.common_save)) }
             FilledTonalButton(
                 onClick = { shareText(ctx, store.exportPresets()) },
                 enabled = presets.isNotEmpty(),
                 modifier = Modifier.weight(1f),
-            ) { ButtonLabel("Export") }
+            ) { ButtonLabel(stringResource(R.string.style_export)) }
             FilledTonalButton(
                 onClick = { importText = ""; importing = true },
                 modifier = Modifier.weight(1f),
-            ) { ButtonLabel("Import") }
+            ) { ButtonLabel(stringResource(R.string.style_import)) }
         }
     }
 
     if (naming) {
+        // An empty field falls back to a numbered name. Resolved here rather than in the store,
+        // because the store has no business holding a piece of copy in one language.
+        val fallbackName = stringResource(R.string.style_preset_default_name, presets.size + 1)
         AlertDialog(
             onDismissRequest = { naming = false },
             shape = MaterialTheme.shapes.extraLarge,
-            title = { Text("Name this look") },
+            title = { Text(stringResource(R.string.style_name_this_look)) },
             text = {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     singleLine = true,
-                    label = { Text("Name") },
+                    label = { Text(stringResource(R.string.style_name_field)) },
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
-                    store.savePreset(name)
+                    store.savePreset(name.trim().ifEmpty { fallbackName })
                     naming = false
-                }) { ButtonLabel("Save") }
+                }) { ButtonLabel(stringResource(R.string.common_save)) }
             },
-            dismissButton = { TextButton(onClick = { naming = false }) { ButtonLabel("Cancel") } },
+            dismissButton = {
+                TextButton(onClick = { naming = false }) {
+                    ButtonLabel(stringResource(R.string.common_cancel))
+                }
+            },
         )
     }
 
@@ -299,27 +322,37 @@ private fun PresetsCard(store: Store) {
         AlertDialog(
             onDismissRequest = { importing = false },
             shape = MaterialTheme.shapes.extraLarge,
-            title = { Text("Paste exported presets") },
+            title = { Text(stringResource(R.string.style_paste_exported_presets)) },
             text = {
                 OutlinedTextField(
                     value = importText,
                     onValueChange = { importText = it },
-                    label = { Text("JSON") },
+                    label = { Text(stringResource(R.string.style_import_json_field)) },
                     modifier = Modifier.heightIn(max = 220.dp),
                 )
             },
             confirmButton = {
+                val res = LocalResources.current
                 TextButton(onClick = {
                     val added = store.importPresets(importText)
                     Toast.makeText(
                         ctx,
-                        if (added == null) "That JSON could not be read" else "Imported $added",
+                        // Read through LocalResources rather than the context: a Context captured in
+                        // composition is not invalidated when the configuration changes, so after a
+                        // locale switch this toast would have been built from the previous language's
+                        // resources.
+                        if (added == null) res.getString(R.string.style_import_failed)
+                        else res.getString(R.string.style_import_count, added),
                         Toast.LENGTH_SHORT,
                     ).show()
                     importing = false
-                }) { ButtonLabel("Import") }
+                }) { ButtonLabel(stringResource(R.string.style_import)) }
             },
-            dismissButton = { TextButton(onClick = { importing = false }) { ButtonLabel("Cancel") } },
+            dismissButton = {
+                TextButton(onClick = { importing = false }) {
+                    ButtonLabel(stringResource(R.string.common_cancel))
+                }
+            },
         )
     }
 }
@@ -329,7 +362,9 @@ private fun shareText(ctx: android.content.Context, text: String) {
         type = "text/plain"
         putExtra(android.content.Intent.EXTRA_TEXT, text)
     }
-    ctx.startActivity(android.content.Intent.createChooser(send, "Export presets"))
+    ctx.startActivity(
+        android.content.Intent.createChooser(send, ctx.getString(R.string.style_export_chooser))
+    )
 }
 
 @Composable
@@ -378,7 +413,7 @@ fun PatternCarousel(
                     }
                     .padding(horizontal = 18.dp, vertical = 11.dp),
             ) {
-                Text(p.label, style = MaterialTheme.typography.labelLarge, color = fg)
+                Text(stringResource(p.labelRes), style = MaterialTheme.typography.labelLarge, color = fg)
             }
         }
     }

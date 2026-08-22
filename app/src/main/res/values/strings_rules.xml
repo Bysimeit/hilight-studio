@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The per-app rules screen and the chat picker that sits in front of it.
+
+    Two prefixes: rules_* is the rules screen, its app picker and its editor; chat_* is the scope
+    chooser and the conversation picker. Shared vocabulary is not repeated here — pattern names, cycle
+    meanings, duration units, the percentage and the buttons every screen uses all live in
+    strings_common.xml.
+
+    Format strings are positional (%1$s, not %s), because Japanese puts the parts in a different
+    order. Several of these were built by concatenating fragments in Kotlin and are single format
+    strings now for the same reason. Nothing that is not read by a person belongs here: the log lines,
+    the JSON keys, the messaging package list and the catch-all package sentinel are all still
+    literals in code.
+-->
+<resources>
+
+    <!-- The screen itself -->
+    <string name="rules_section_title">Per-app rules</string>
+    <string name="rules_intro_apps">Choose an app, then what HiLight does when it notifies you — or while it is open.</string>
+    <string name="rules_intro_messaging">Messaging apps go one step further: a colour for a single contact or chat.</string>
+    <string name="rules_add">Add app rule</string>
+
+    <!-- One rule card. The summary line is "pattern · when it fires": %1$s is a pattern name from
+         strings_common.xml or rules_random_colour, %2$s one of the two trigger phrases below. Those
+         phrases are lower case here and capitalised in the editor's selector, so they are separate
+         strings rather than one reused in both places. -->
+    <string name="rules_card_summary">%1$s · %2$s</string>
+    <string name="rules_random_colour">Random colour</string>
+    <string name="rules_trigger_notification_short">on notification</string>
+    <string name="rules_trigger_foreground_short">while open</string>
+
+    <!-- "Matched", not "fired": a rule matches even when a guard swallowed the flash. %1$s is a
+         relative stamp from the chat_ago_* forms at the bottom of this file. -->
+    <string name="rules_last_matched">Last matched %1$s</string>
+    <string name="rules_not_matched_yet">Not matched yet</string>
+
+    <!-- Said of a rule that also covers what the person says in groups, beside their own chat -->
+    <string name="rules_badge_groups_too">Groups too</string>
+
+    <!-- The app picker. "Any app" is HiLight's own name for the catch-all, not an app label. -->
+    <string name="rules_picker_title">Choose an app</string>
+    <string name="rules_picker_search">Search</string>
+    <string name="rules_any_app">Any app</string>
+    <string name="rules_any_app_caption">Catch-all for apps without their own rule</string>
+
+    <!-- The editor. %1$s is the app, %2$s the chat, for a rule about one conversation. -->
+    <string name="rules_editor_title_chat">%1$s › %2$s</string>
+    <string name="rules_per_chat_notifications_only">Per-chat rules fire on notifications.</string>
+    <string name="rules_trigger_notification">On notification</string>
+    <string name="rules_trigger_foreground">While open</string>
+    <string name="rules_random_colour_each_time">Random colour each time</string>
+    <string name="rules_chat_is_group">This chat is a group, so anything posted in it fires the rule.</string>
+    <string name="rules_include_groups">Also when they post in a group</string>
+    <string name="rules_include_groups_hint">Left off, only their own chat lights this colour, so the group chatter they are part of stays dark.</string>
+    <string name="rules_keyword_label">Only if it mentions (optional)</string>
+    <string name="rules_only_screen_off">Only when the screen is off</string>
+    <string name="rules_time_per_cycle">Time per cycle</string>
+    <string name="rules_brightness">Brightness</string>
+    <string name="rules_test_on_leds">Test on the LEDs</string>
+
+    <!-- Holding the array on for longer than half a minute, and the two warnings gating it -->
+    <string name="rules_show_for">Show for</string>
+    <string name="rules_allow_one_minute">Allow up to 1 minute</string>
+    <string name="rules_duration_warn_first_title">Longer than 30 seconds?</string>
+    <string name="rules_duration_warn_first_body">Every notification from this app would light the array for that long, which costs battery and is far beyond what stock HiLight does.</string>
+    <string name="rules_duration_warn_second_title">Are you sure?</string>
+    <string name="rules_duration_warn_second_body">A busy app can fire often, so the LEDs may end up lit most of the time. You can turn this back down at any time.</string>
+
+    <!-- Last thing read before Save, when the edit would land on top of another rule -->
+    <string name="rules_replace_warning">An existing rule for this app already covers that, and saving will replace its settings with these.</string>
+
+    <!-- What a per-chat rule matches on, and the repair for a chat id that has gone stale. %1$s in
+         rules_match_by_name is the app whose chat could be renamed. -->
+    <string name="rules_match_by_id">Matched by chat id, which survives the chat being renamed.</string>
+    <string name="rules_match_id_dropped">The stored chat id is dropped when you save, and a fresh one is learned the next time that chat messages.</string>
+    <string name="rules_match_by_name">Matched by name, so renaming the chat in %1$s can stop it matching.</string>
+    <string name="rules_relearn_chat">Re-learn this chat</string>
+    <string name="rules_relearn_hint">Forgets the stored chat id and matches on the name instead, taking up the new id the next time that chat messages — the repair for an id changed by a reinstall or a restored backup.</string>
+
+    <!-- Whole app or one chat, asked before the editor opens. %1$s is the app. -->
+    <string name="chat_scope_title">What should this rule cover?</string>
+    <string name="chat_scope_whole_app">All notifications from %1$s</string>
+    <string name="chat_scope_whole_app_hint">Any chat, any sender.</string>
+    <string name="chat_scope_one_chat">One contact or chat</string>
+    <string name="chat_scope_one_chat_hint">A colour for them alone, chosen from the chats HiLight has seen.</string>
+
+    <!-- The chat picker. %1$s is the app throughout. -->
+    <string name="chat_picker_title">Choose a chat</string>
+    <string name="chat_picker_intro">Which chat in %1$s this rule watches.</string>
+    <string name="chat_seen_list_header">Chats HiLight has seen, newest first.</string>
+    <string name="chat_no_chats_yet">No chats to list yet: HiLight has not seen a message from %1$s.</string>
+    <string name="chat_badge_group">Group</string>
+    <string name="chat_last_message">Last message %1$s</string>
+
+    <!-- The two paths that work before anything has been learned -->
+    <string name="chat_learn_next">Learn the next message</string>
+    <string name="chat_learn_next_hint">The surest way. The name comes from a real notification, so it is exactly what HiLight compares against later.</string>
+    <string name="chat_pick_contact">Pick from contacts</string>
+    <string name="chat_pick_contact_hint">Opens the system picker, so HiLight reads only the contact you tap and never your address book. If the app shows a different name for them, the rule can miss.</string>
+
+    <!-- Waiting for a message to arrive, and the chat that arrived. %1$s is the app, then the chat. -->
+    <string name="chat_listening">Listening</string>
+    <string name="chat_waiting">Waiting for the next message from %1$s…</string>
+    <string name="chat_waiting_hint">Open the chat you want and send something, or wait for them to write.</string>
+    <string name="chat_stop_waiting">Stop waiting</string>
+    <string name="chat_captured">Captured: %1$s — use this?</string>
+    <string name="chat_captured_has_id">This chat came with a stable id, so renaming it will not break the rule.</string>
+    <string name="chat_captured_no_id">No chat id came with it, so the rule will match on the name.</string>
+    <string name="chat_use_this">Use this chat</string>
+    <string name="chat_wait_another">Wait for another</string>
+
+    <!-- Shown instead of the wait when the notification listener is switched off. Saying
+         "Listening" over a listener the system has disabled is the most misleading thing this
+         dialog could do, so it says the opposite plainly. -->
+    <string name="chat_not_listening">Not listening</string>
+    <string name="chat_no_access_title">HiLight cannot watch for the next message yet.</string>
+    <string name="chat_no_access_body">Without notification access HiLight sees no notifications at all, and Android withdraws that access on its own once an app has gone unused for a while.</string>
+    <string name="chat_open_notification_access">Open notification access</string>
+
+    <!-- Told when a chat or a contact cannot be turned into a rule at all -->
+    <string name="chat_contact_no_name">That contact had no name to read. Try one of the other two ways.</string>
+    <string name="chat_unusable">That chat has no name HiLight can compare and no stable id either, so a rule for it could never fire. A rule for the whole app still works.</string>
+
+    <!--
+        How long ago a chat last spoke, or a rule last matched.
+
+        Coarse on purpose: these lines only answer whether something is alive or quietly broken.
+        The counted forms are plurals rather than concatenation because English inflects the unit
+        where Japanese does not, and no arrangement of fragments is right for both.
+    -->
+    <string name="chat_ago_just_now">just now</string>
+    <string name="chat_ago_over_a_week">over a week ago</string>
+    <!-- No usable stamp: never seen, or a stamp that did not survive being stored -->
+    <string name="chat_ago_unknown">a while ago</string>
+
+    <!-- Both forms are the same in English, since the abbreviation does not inflect. They stay
+         separate entries so a language that does inflect it has somewhere to put the difference. -->
+    <plurals name="chat_ago_minutes">
+        <item quantity="one">%1$d min ago</item>
+        <item quantity="other">%1$d min ago</item>
+    </plurals>
+
+    <plurals name="chat_ago_hours">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+
+    <!--
+        A single day is its own word rather than a count of one, which is why it is a plain string
+        and not the "one" form below. Kept out of the plurals on purpose: a language whose plural
+        rules have only an "other" class — Japanese among them — has nowhere to put a word that
+        applies to exactly one day, and would be forced to say "1 day ago" instead.
+
+        The plurals is therefore only ever asked for two days and up.
+    -->
+    <string name="chat_ago_yesterday">yesterday</string>
+    <plurals name="chat_ago_days">
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+
+    <!-- Live-state rules: the two call states, and the reasons a rule can sit dark. -->
+    <string name="rules_call_ringing">Incoming call</string>
+    <string name="rules_call_ringing_active">while the phone is ringing</string>
+    <string name="rules_call_ringing_idle">The array stays dark for incoming calls</string>
+    <string name="rules_call_connected">On a call</string>
+    <string name="rules_call_connected_active">while a call is connected</string>
+    <string name="rules_call_connected_idle">The array stays dark during calls</string>
+    <string name="rules_call_hold">Keep lit for the whole call</string>
+    <string name="rules_call_duty_warning">The array may only be lit for half of any ten-minute window. A long call uses that up, and every later rule stays dark until it recovers.</string>
+    <string name="rules_duration_for">for %1$s</string>
+
+    <string name="rules_usage_needed_title">Usage access needed</string>
+    <string name="rules_usage_needed_body">"While open" rules stay dark until HiLight can see which app is in front. Grant usage access to HiLight Studio, then come back.</string>
+    <string name="rules_notif_needed_title">Notification access needed</string>
+    <string name="rules_notif_needed_body">"On notification" rules stay dark until HiLight can see your notifications. Grant notification access to HiLight Studio, then come back.</string>
+    <string name="rules_needed_pill">needed</string>
+    <string name="rules_resting_title">LEDs resting</string>
+    <string name="rules_resting_pill">resting</string>
+    <string name="rules_resting_body">The array has been lit for more than half of the last ten minutes, so it is cooling down. Rules stay dark until that window rolls over. A long call held on the whole time is the usual cause.</string>
+    <string name="rules_off_title">HiLight is off</string>
+    <string name="rules_off_pill">off</string>
+    <string name="rules_off_body">Rules only run while HiLight is on. Turn it on from the Live tab.</string>
+</resources>

@@ -6,6 +6,7 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.util.Log
+import androidx.annotation.StringRes
 import com.hilight.core.IHiLightService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,10 +14,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 import rikka.shizuku.Shizuku
 
-enum class Transport(val label: String) {
-    AUTO("Auto"),
-    ADB("Built-in"),
-    SHIZUKU("Shizuku"),
+/** How the privileged renderer is reached. */
+enum class Transport(@StringRes val labelRes: Int) {
+    /** Prefer Shizuku, fall back to an adb-started helper. */
+    AUTO(R.string.transport_auto),
+    SHIZUKU(R.string.transport_shizuku),
+    ADB(R.string.transport_adb),
 }
 
 interface Backend {
@@ -42,8 +45,14 @@ class ShizukuBackend(private val ctx: Context) : Backend {
     val state: StateFlow<State> = _state.asStateFlow()
 
     private var service: IHiLightService? = null
+    /** Raw text from a failure. Comes from the framework, so it is not translated. */
     private var lastError: String? = null
 
+    /** Our own explanation of a failure, when we have one to give. */
+    @StringRes
+    private var lastErrorRes: Int? = null
+
+    /** Latest state document, replayed when the service (re)connects. */
     private var pending: String? = null
 
     var onAvailabilityChanged: (() -> Unit)? = null
@@ -60,7 +69,7 @@ class ShizukuBackend(private val ctx: Context) : Backend {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             if (binder == null || !binder.pingBinder()) {
                 _state.value = State.FAILED
-                lastError = "service returned a dead binder"
+                lastErrorRes = R.string.shizuku_error_dead_binder
                 return
             }
             service = IHiLightService.Stub.asInterface(binder)
@@ -113,7 +122,7 @@ class ShizukuBackend(private val ctx: Context) : Backend {
         }
         if (Shizuku.isPreV11()) {
             _state.value = State.FAILED
-            lastError = "Shizuku is too old; v11 or newer is required"
+            lastErrorRes = R.string.shizuku_error_too_old
             return
         }
         if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
@@ -139,6 +148,7 @@ class ShizukuBackend(private val ctx: Context) : Backend {
             .onFailure {
                 _state.value = State.FAILED
                 lastError = it.message
+                lastErrorRes = null
                 Log.w(TAG, "bindUserService failed", it)
             }
     }
@@ -149,6 +159,10 @@ class ShizukuBackend(private val ctx: Context) : Backend {
         _state.value = State.NOT_RUNNING
     }
 
+    /** Our own explanation, as a resource id, or null when the failure came with its own text. */
+    fun errorRes(): Int? = lastErrorRes
+
+    /** Untranslated text straight from the failure, when there is any. */
     fun errorText(): String? = lastError
 
     override fun push(json: String) {

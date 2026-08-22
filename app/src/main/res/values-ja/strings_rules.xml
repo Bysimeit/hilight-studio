@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Japanese. The English source is quoted above each entry so a reviewer never has to hold two files
+    open at once. Terms are fixed by docs/i18n/ja-glossary.md — アプリ別ルール for a per-app rule,
+    連絡先別ルール for a per-contact rule, used everywhere so that one feature has one name, and a
+    person, チャット for a chat (never 会話), 次のメッセージから取得 for learning the next message
+    (never 学習), 最終一致 for last matched, and 固定のチャット ID for a stable chat id. HiLight, LED
+    and ID stay in Latin script.
+
+    Two verbs are kept apart the way the English keeps them apart: 一致 is a rule matching a
+    notification, 発動 is the flash it then asks for. A rule matches even when a guard swallowed the
+    light, which is the whole point of the card's 最終一致 line.
+
+    The distinction the feature rests on is carried by one pair of notes, built to the same shape so
+    they read as two halves of one sentence: チャット ID で一致するため、名前が変わっても一致し続けます
+    against 名前で一致するため、名前を変更すると一致しなくなることがあります.
+
+    Register: polite-neutral です・ます for captions; labels, buttons, badges and pills are noun
+    phrases with no full stop, and questions asked in a title end in ますか with no punctuation, as in
+    strings_setup.xml.
+
+    Length: ButtonLabel is single line with no wrapping, so the two buttons sharing a row inside the
+    capture card are これを使う and もう一度待つ rather than fuller renderings. The relative stamps take
+    the compact no-space form the duration resources use (%1$d分前), while prose keeps the space
+    (2 つの方法).
+-->
+<resources>
+
+    <!-- The screen itself -->
+    <!-- "Per-app rules" -->
+    <string name="rules_section_title">アプリ別ルール</string>
+    <!-- "Choose an app, then what HiLight does when it notifies you — or while it is open." -->
+    <string name="rules_intro_apps">アプリを選び、そのアプリから通知が届いたとき、またはアプリ表示中に HiLight が何をするかを設定します。</string>
+    <!-- "Messaging apps go one step further: a colour for a single contact or chat." -->
+    <string name="rules_intro_messaging">メッセージアプリではもう一歩進んで、特定の連絡先やチャットだけに色を設定できます。</string>
+    <!-- "Add app rule" -->
+    <string name="rules_add">アプリ別ルールを追加</string>
+
+    <!-- One rule card. The summary line is "pattern · when it fires". The short trigger phrases are
+         lower case in English and capitalised in the editor's selector; Japanese has no case, so the
+         short pair is simply the shorter rendering of the same two words. -->
+    <!-- "%1$s · %2$s" -->
+    <string name="rules_card_summary">%1$s · %2$s</string>
+    <!-- "Random colour" — the same wording as pattern_random, which the summary line sits beside -->
+    <string name="rules_random_colour">ランダムな色</string>
+    <!-- "on notification" -->
+    <string name="rules_trigger_notification_short">通知時</string>
+    <!-- "while open" -->
+    <string name="rules_trigger_foreground_short">表示中</string>
+
+    <!-- "Matched", not "fired": 一致 is the rule recognising the notification, and it is recorded even
+         when a guard swallowed the light. %1$s is a relative stamp from the chat_ago_* forms below. -->
+    <!-- "Last matched %1$s" -->
+    <string name="rules_last_matched">最終一致 %1$s</string>
+    <!-- "Not matched yet" -->
+    <string name="rules_not_matched_yet">まだ一致なし</string>
+
+    <!-- Said of a rule that also covers what the person says in groups, beside their own chat. A pill,
+         so it is the shortest faithful rendering. -->
+    <!-- "Groups too" -->
+    <string name="rules_badge_groups_too">グループも</string>
+
+    <!-- The app picker. "Any app" is HiLight's own name for the catch-all, so すべてのアプリ rather
+         than 任意のアプリ, which would collide with 任意 as used for "optional". -->
+    <!-- "Choose an app" -->
+    <string name="rules_picker_title">アプリを選択</string>
+    <!-- "Search" -->
+    <string name="rules_picker_search">検索</string>
+    <!-- "Any app" -->
+    <string name="rules_any_app">すべてのアプリ</string>
+    <!-- "Catch-all for apps without their own rule" -->
+    <string name="rules_any_app_caption">個別のルールがないアプリすべてに適用されます。</string>
+
+    <!-- The editor. %1$s is the app, %2$s the chat. The › is punctuation and stays. -->
+    <!-- "%1$s › %2$s" -->
+    <string name="rules_editor_title_chat">%1$s › %2$s</string>
+    <!-- "Per-chat rules fire on notifications." -->
+    <string name="rules_per_chat_notifications_only">連絡先別ルールは通知時に発動します。</string>
+    <!-- "On notification" -->
+    <string name="rules_trigger_notification">通知時</string>
+    <!-- "While open" — the same wording setup_usage_body quotes as 「アプリ表示中」ルール -->
+    <string name="rules_trigger_foreground">アプリ表示中</string>
+    <!-- "Random colour each time" -->
+    <string name="rules_random_colour_each_time">毎回ランダムな色</string>
+    <!-- "This chat is a group, so anything posted in it fires the rule." -->
+    <string name="rules_chat_is_group">このチャットはグループのため、ここでの投稿すべてでルールが発動します。</string>
+    <!-- "Also when they post in a group" — a toggle label beside a switch, so the subject is carried
+         by the hint below rather than spelled out here -->
+    <string name="rules_include_groups">グループでの発言も対象にする</string>
+    <!-- "Left off, only their own chat lights this colour, so the group chatter they are part of stays
+         dark." -->
+    <string name="rules_include_groups_hint">オフのままにすると、その相手との個別チャットだけがこの色で点灯し、参加しているグループチャットは消灯したままになります。</string>
+    <!-- "Only if it mentions (optional)" — the field's own label, so 「この語」 is the word typed into it -->
+    <string name="rules_keyword_label">この語を含む場合のみ（任意）</string>
+    <!-- "Only when the screen is off" -->
+    <string name="rules_only_screen_off">画面消灯時のみ</string>
+    <!-- "Time per cycle" -->
+    <string name="rules_time_per_cycle">1 周期の時間</string>
+    <!-- "Brightness" -->
+    <string name="rules_brightness">明るさ</string>
+    <!-- "Test on the LEDs" -->
+    <string name="rules_test_on_leds">LED でテスト</string>
+
+    <!-- Holding the array on for longer than half a minute, and the two warnings gating it. The
+         wording follows the setup screen's identical pair, since it is the same guard. -->
+    <!-- "Show for" -->
+    <string name="rules_show_for">点灯時間</string>
+    <!-- "Allow up to 1 minute" -->
+    <string name="rules_allow_one_minute">最大 1 分まで許可</string>
+    <!-- "Longer than 30 seconds?" -->
+    <string name="rules_duration_warn_first_title">30 秒より長くしますか</string>
+    <!-- "Every notification from this app would light the array for that long, which costs battery and
+         is far beyond what stock HiLight does." -->
+    <string name="rules_duration_warn_first_body">このアプリから通知が届くたびに、LED アレイがその時間ずっと点灯します。電池を消費し、標準の HiLight の動作をはるかに超えます。</string>
+    <!-- "Are you sure?" -->
+    <string name="rules_duration_warn_second_title">本当に設定しますか</string>
+    <!-- "A busy app can fire often, so the LEDs may end up lit most of the time. You can turn this
+         back down at any time." -->
+    <string name="rules_duration_warn_second_body">通知の多いアプリでは頻繁に発動するため、LED がほとんどの時間点灯したままになることがあります。設定はいつでも戻せます。</string>
+
+    <!-- Last thing read before Save, when the edit would land on top of another rule -->
+    <!-- "An existing rule for this app already covers that, and saving will replace its settings with
+         these." -->
+    <string name="rules_replace_warning">このアプリには同じ対象の既存のルールがすでにあり、保存するとその設定がこの内容に置き換わります。</string>
+
+    <!--
+        What a per-chat rule matches on, and the repair for a chat id that has gone stale.
+
+        These three are where the feature's main diagnostic lives, so the two matchers are worded as
+        opposites of one sentence: チャット ID で一致するため、…一致し続けます against
+        名前で一致するため、…一致しなくなることがあります. 固定のチャット ID is kept for the capture
+        card, where the id's stability is the news; here the surviving-a-rename clause says it instead.
+    -->
+    <!-- "Matched by chat id, which survives the chat being renamed." -->
+    <string name="rules_match_by_id">チャット ID で一致するため、チャットの名前が変わっても一致し続けます。</string>
+    <!-- "The stored chat id is dropped when you save, and a fresh one is learned the next time that
+         chat messages." -->
+    <string name="rules_match_id_dropped">保存すると保存済みのチャット ID を削除し、そのチャットから次にメッセージが届いたときに新しい ID を取得します。</string>
+    <!-- "Matched by name, so renaming the chat in %1$s can stop it matching." -->
+    <string name="rules_match_by_name">名前で一致するため、%1$s でチャットの名前を変更すると一致しなくなることがあります。</string>
+    <!-- "Re-learn this chat" -->
+    <string name="rules_relearn_chat">このチャットを再取得</string>
+    <!-- "Forgets the stored chat id and matches on the name instead, taking up the new id the next time
+         that chat messages — the repair for an id changed by a reinstall or a restored backup." -->
+    <string name="rules_relearn_hint">保存済みのチャット ID を削除して名前で一致するようにし、そのチャットから次にメッセージが届いたときに新しい ID を取得します。再インストールやバックアップの復元で ID が変わった場合の修復手段です。</string>
+
+    <!-- Whole app or one chat, asked before the editor opens. %1$s is the app. -->
+    <!-- "What should this rule cover?" -->
+    <string name="chat_scope_title">このルールは何を対象にしますか</string>
+    <!-- "All notifications from %1$s" -->
+    <string name="chat_scope_whole_app">%1$s のすべての通知</string>
+    <!-- "Any chat, any sender." -->
+    <string name="chat_scope_whole_app_hint">すべてのチャット、すべての送信者が対象です。</string>
+    <!-- "One contact or chat" -->
+    <string name="chat_scope_one_chat">特定の連絡先またはチャット</string>
+    <!-- "A colour for them alone, chosen from the chats HiLight has seen." -->
+    <string name="chat_scope_one_chat_hint">その相手だけに色を設定します。HiLight が検出したチャットから選べます。</string>
+
+    <!-- The chat picker. %1$s is the app throughout. "Seen" is 検出した rather than 見た, and stays
+         distinct from the setup screen's 記憶した, which is what the list does with them afterwards. -->
+    <!-- "Choose a chat" -->
+    <string name="chat_picker_title">チャットを選択</string>
+    <!-- "Which chat in %1$s this rule watches." -->
+    <string name="chat_picker_intro">このルールが監視する %1$s のチャットを選びます。</string>
+    <!-- "Chats HiLight has seen, newest first." -->
+    <string name="chat_seen_list_header">HiLight が検出したチャットを新しい順に表示しています。</string>
+    <!-- "No chats to list yet: HiLight has not seen a message from %1$s." -->
+    <string name="chat_no_chats_yet">表示できるチャットはまだありません。HiLight は %1$s からのメッセージを検出していません。</string>
+    <!-- "Group" — a pill beside a chat name, so there is no shorter form to take -->
+    <string name="chat_badge_group">グループ</string>
+    <!-- "Last message %1$s" -->
+    <string name="chat_last_message">最終メッセージ %1$s</string>
+
+    <!-- The two paths that work before anything has been learned -->
+    <!-- "Learn the next message" -->
+    <string name="chat_learn_next">次のメッセージから取得</string>
+    <!-- "The surest way. The name comes from a real notification, so it is exactly what HiLight
+         compares against later." -->
+    <string name="chat_learn_next_hint">最も確実な方法です。実際の通知から名前を取得するため、HiLight が後で比較する文字列とまったく同じになります。</string>
+    <!-- "Pick from contacts" -->
+    <string name="chat_pick_contact">連絡先から選択</string>
+    <!-- "Opens the system picker, so HiLight reads only the contact you tap and never your address
+         book. If the app shows a different name for them, the rule can miss." -->
+    <string name="chat_pick_contact_hint">システムの選択画面を開きます。HiLight はタップした連絡先だけを読み取り、アドレス帳全体を読み取ることはありません。アプリ側で別の名前が表示されている場合、ルールが一致しないことがあります。</string>
+
+    <!-- Waiting for a message to arrive, and the chat that arrived. %1$s is the app, then the chat. -->
+    <!-- "Listening" — a pill, and the sentence under it says what is being waited for -->
+    <string name="chat_listening">待機中</string>
+    <!-- "Waiting for the next message from %1$s…" -->
+    <string name="chat_waiting">%1$s からの次のメッセージを待っています…</string>
+    <!-- "Open the chat you want and send something, or wait for them to write." -->
+    <string name="chat_waiting_hint">対象のチャットを開いて何か送信するか、相手からのメッセージを待ってください。</string>
+    <!-- "Stop waiting" -->
+    <string name="chat_stop_waiting">待機を停止</string>
+    <!-- "Captured: %1$s — use this?" — the colon and dash become Japanese sentence breaks -->
+    <string name="chat_captured">%1$s を取得しました。これを使いますか</string>
+    <!-- "This chat came with a stable id, so renaming it will not break the rule." -->
+    <string name="chat_captured_has_id">このチャットには固定のチャット ID が付いていたため、名前を変更してもルールは動作し続けます。</string>
+    <!-- "No chat id came with it, so the rule will match on the name." -->
+    <string name="chat_captured_no_id">チャット ID は付いていなかったため、ルールは名前で一致します。</string>
+    <!-- "Use this chat" — shares a row with the button below, and ButtonLabel does not wrap, so it is
+         the short form the question above it already makes specific -->
+    <string name="chat_use_this">これを使う</string>
+    <!-- "Wait for another" -->
+    <string name="chat_wait_another">もう一度待つ</string>
+
+    <!-- Shown instead of the wait when the notification listener is switched off. Saying 待機中 over a
+         listener the system has disabled is the most misleading thing this dialog could do, so the
+         pill says plainly that the wait cannot happen. -->
+    <!-- "Not listening" -->
+    <string name="chat_not_listening">待機できません</string>
+    <!-- "HiLight cannot watch for the next message yet." -->
+    <string name="chat_no_access_title">HiLight はまだ次のメッセージを待てません。</string>
+    <!-- "Without notification access HiLight sees no notifications at all, and Android withdraws that
+         access on its own once an app has gone unused for a while." -->
+    <string name="chat_no_access_body">通知へのアクセスがないと、HiLight は通知をまったく受け取れません。また Android は、アプリが一定期間使われないとこのアクセスを自動的に取り消します。</string>
+    <!-- "Open notification access" -->
+    <string name="chat_open_notification_access">通知へのアクセスを開く</string>
+
+    <!-- Told when a chat or a contact cannot be turned into a rule at all -->
+    <!-- "That contact had no name to read. Try one of the other two ways." -->
+    <string name="chat_contact_no_name">その連絡先から読み取れる名前がありませんでした。他の 2 つの方法を試してください。</string>
+    <!-- "That chat has no name HiLight can compare and no stable id either, so a rule for it could
+         never fire. A rule for the whole app still works." -->
+    <string name="chat_unusable">そのチャットには HiLight が比較できる名前も固定のチャット ID もないため、ルールを作っても発動しません。アプリ全体を対象にするルールなら動作します。</string>
+
+    <!--
+        How long ago a chat last spoke, or a rule last matched.
+
+        These are read as the value half of 最終メッセージ %1$s and 最終一致 %1$s, so they are compact
+        noun phrases with no space between number and unit, exactly as the duration resources in
+        strings_common.xml are.
+    -->
+    <!-- "just now" -->
+    <string name="chat_ago_just_now">たった今</string>
+    <!-- "over a week ago" -->
+    <string name="chat_ago_over_a_week">1週間以上前</string>
+    <!-- No usable stamp: never seen, or a stamp that did not survive being stored -->
+    <!-- "a while ago" -->
+    <string name="chat_ago_unknown">しばらく前</string>
+
+    <!-- Japanese has only the "other" quantity class, so each plurals carries that item alone. The
+         English "one" forms have nowhere to go here and are not written. -->
+    <!-- "%1$d min ago" -->
+    <plurals name="chat_ago_minutes">
+        <item quantity="other">%1$d分前</item>
+    </plurals>
+
+    <!-- "%1$d hours ago" -->
+    <plurals name="chat_ago_hours">
+        <item quantity="other">%1$d時間前</item>
+    </plurals>
+
+    <!-- One day is its own word rather than a count of one, which is exactly why the source keeps it
+         out of the plurals: with only an "other" class there would be nowhere to put it. -->
+    <!-- "yesterday" -->
+    <string name="chat_ago_yesterday">昨日</string>
+    <!-- "%1$d days ago" -->
+    <plurals name="chat_ago_days">
+        <item quantity="other">%1$d日前</item>
+    </plurals>
+
+</resources>
+

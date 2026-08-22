@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -265,7 +266,9 @@ fun PixelSlider(
     value: Float,
     range: ClosedFloatingPointRange<Float>,
     onChange: (Float) -> Unit,
-    format: (Float) -> String = { "%.0f".format(it) },
+    // Composable because the value badge often shows a duration, and a duration's units come from
+    // resources now that they have to be translated.
+    format: @Composable (Float) -> String = { "%.0f".format(it) },
 ) {
     Column {
         Row(
@@ -314,7 +317,9 @@ fun ButtonLabel(text: String) {
 fun <T> SegmentedSelector(
     options: List<T>,
     selected: T,
-    label: (T) -> String,
+    // Composable because every caller resolves the label from resources, and pre-building a map of
+    // them outside the lambda is a workaround rather than a design.
+    label: @Composable (T) -> String,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -356,10 +361,16 @@ fun DoubleConfirm(
         confirmButton = {
             TextButton(
                 onClick = { if (step == 1) step = 2 else onConfirmed() },
-            ) { ButtonLabel(if (step == 1) "Continue" else confirmLabel) }
+            ) {
+                ButtonLabel(
+                    if (step == 1) stringResource(R.string.common_continue) else confirmLabel
+                )
+            }
         },
         dismissButton = {
-            TextButton(onClick = onCancelled) { ButtonLabel("Keep it short") }
+            TextButton(onClick = onCancelled) {
+                ButtonLabel(stringResource(R.string.common_keep_it_short))
+            }
         },
     )
 }
@@ -401,7 +412,7 @@ fun GatedDurationSlider(
             firstBody = warnFirst.second,
             secondTitle = warnSecond.first,
             secondBody = warnSecond.second,
-            confirmLabel = "I understand",
+            confirmLabel = stringResource(R.string.common_i_understand),
             onConfirmed = {
                 asking = false
                 unlocked = true
@@ -411,13 +422,18 @@ fun GatedDurationSlider(
     }
 }
 
+/** Sub-second values must not read as "0s", which is what integer seconds would give. */
+@Composable
 fun formatDuration(ms: Int): String = when {
     ms >= 60_000 -> {
         val m = ms / 60_000
         val s = (ms % 60_000) / 1000
-        if (s == 0) "${m}m" else "${m}m ${s}s"
+        if (s == 0) stringResource(R.string.duration_minutes, m)
+        else stringResource(R.string.duration_minutes_seconds, m, s)
     }
-    ms >= 10_000 -> "${ms / 1000}s"
-    ms >= 1_000 -> "%.1fs".format(ms / 1000f)
-    else -> "${ms}ms"
+    ms >= 10_000 -> stringResource(R.string.duration_seconds, ms / 1000)
+    // The fraction is formatted with the default locale so that a comma decimal separator appears
+    // where that is what a reader expects.
+    ms >= 1_000 -> stringResource(R.string.duration_seconds_fraction, "%.1f".format(ms / 1000f))
+    else -> stringResource(R.string.duration_ms, ms)
 }
