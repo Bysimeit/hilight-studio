@@ -1,0 +1,18 @@
+name: Android toolchain
+description: JDK 21, the Android 17 preview SDK, and a cached Gradle.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+
+    - name: Install the Android 17 preview platform
+      shell: bash
+      run: sdkmanager --channel=3 'platforms;android-37.0' 'build-tools;36.1.0'
+
+    - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947
