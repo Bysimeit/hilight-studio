@@ -87,6 +87,8 @@ class MainActivity : ComponentActivity() {
             refreshStatus()
             syncWatcher()
         }
+        NotificationTrigger.nudge(this)
+        AdbReconnectService.sweepStaleNotification(this)
     }
 
     override fun onStop() {

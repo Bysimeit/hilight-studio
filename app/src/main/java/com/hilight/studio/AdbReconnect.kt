@@ -36,6 +36,11 @@ class AdbReconnectService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    override fun onCreate() {
+        super.onCreate()
+        running = true
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(NOTIFICATION_ID, notification())
         if (job?.isActive != true) job = scope.launch { run() }
@@ -43,7 +48,9 @@ class AdbReconnectService : Service() {
     }
 
     override fun onDestroy() {
+        running = false
         scope.cancel()
+        runCatching { stopForeground(STOP_FOREGROUND_REMOVE) }
         super.onDestroy()
     }
 
@@ -65,6 +72,10 @@ class AdbReconnectService : Service() {
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
             NotificationChannel(CHANNEL, "HiLight reconnect", NotificationManager.IMPORTANCE_MIN)
+                .apply {
+                    setShowBadge(false)
+                    lockscreenVisibility = Notification.VISIBILITY_SECRET
+                }
         )
         return Notification.Builder(this, CHANNEL)
             .setContentTitle("HiLight Studio")
@@ -75,6 +86,16 @@ class AdbReconnectService : Service() {
     }
 
     companion object {
+        @Volatile
+        private var running = false
+
+        fun sweepStaleNotification(ctx: Context) {
+            if (running) return
+            runCatching {
+                ctx.getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+            }
+        }
+
         private const val CHANNEL = "adb_reconnect"
         private const val NOTIFICATION_ID = 9
         private const val WINDOW_MS = 180_000L

@@ -74,12 +74,12 @@
         </service>
 
         <service
-            android:name=".ForegroundWatcher"
+            android:name=".RuleWatcher"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Drives the HiLight LEDs from the foreground app" />
+                android:value="Drives the HiLight LEDs from the foreground app and call state" />
         </service>
 
         <service

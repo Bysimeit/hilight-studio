@@ -15,7 +15,9 @@ public final class OutputGateTest {
         gate.armAmbient(0, TIMEOUT);
 
         assertEquals(OutputGate.Layer.AMBIENT, gate.next(1_000));
-        assertEquals(OutputGate.Layer.BLANK, gate.next(TIMEOUT + 1));
+        for (int i = 0; i < OutputGate.BLANK_FRAMES; i++) {
+            assertEquals(OutputGate.Layer.BLANK, gate.next(TIMEOUT + 1 + i));
+        }
 
         assertEquals(OutputGate.Layer.IDLE, gate.next(TIMEOUT + 100));
         assertTrue(gate.isAmbientHeld());
@@ -25,7 +27,7 @@ public final class OutputGateTest {
     public void alertWinsWhileItLastsThenBlanksWhenAmbientIsAlreadyExpired() {
         OutputGate gate = new OutputGate();
         gate.armAmbient(0, TIMEOUT);
-        gate.next(TIMEOUT + 1);
+        drain(gate, TIMEOUT + 1);
         assertEquals(OutputGate.Layer.IDLE, gate.next(TIMEOUT + 100));
 
         long fired = TIMEOUT + 1_000;
@@ -33,15 +35,15 @@ public final class OutputGateTest {
         assertEquals(OutputGate.Layer.ALERT, gate.next(fired));
         assertEquals(OutputGate.Layer.ALERT, gate.next(fired + 9_999));
 
-        assertEquals(OutputGate.Layer.BLANK, gate.next(fired + 10_000));
-        assertEquals(OutputGate.Layer.IDLE, gate.next(fired + 10_033));
+        drainAsserting(gate, fired + 10_000);
+        assertEquals(OutputGate.Layer.IDLE, gate.next(fired + 10_100));
     }
 
     @Test
     public void cancellingAnAlertEarlyStillBlanksTheArray() {
         OutputGate gate = new OutputGate();
         gate.armAmbient(0, TIMEOUT);
-        gate.next(TIMEOUT + 1);
+        drain(gate, TIMEOUT + 1);
 
         long fired = TIMEOUT + 1_000;
         gate.startAlert(fired, 10_000);
@@ -49,8 +51,8 @@ public final class OutputGateTest {
 
         gate.clearAlert();
         assertFalse(gate.isAlertHeld());
-        assertEquals(OutputGate.Layer.BLANK, gate.next(fired + 2_000));
-        assertEquals(OutputGate.Layer.IDLE, gate.next(fired + 2_033));
+        drainAsserting(gate, fired + 2_000);
+        assertEquals(OutputGate.Layer.IDLE, gate.next(fired + 2_100));
     }
 
     @Test
@@ -78,7 +80,7 @@ public final class OutputGateTest {
     public void armingAgainReopensTheWindowAndClearsTheLatch() {
         OutputGate gate = new OutputGate();
         gate.armAmbient(0, TIMEOUT);
-        gate.next(TIMEOUT + 1);
+        drain(gate, TIMEOUT + 1);
         assertTrue(gate.isAmbientHeld());
 
         gate.armAmbient(TIMEOUT + 100, TIMEOUT);
@@ -126,8 +128,8 @@ public final class OutputGateTest {
 
         assertFalse(gate.isAlertHeld());
         assertFalse(gate.isAlertOpenEnded());
-        assertEquals(OutputGate.Layer.BLANK, gate.next(TIMEOUT + 30_001));
-        assertEquals(OutputGate.Layer.IDLE, gate.next(TIMEOUT + 30_034));
+        drainAsserting(gate, TIMEOUT + 30_001);
+        assertEquals(OutputGate.Layer.IDLE, gate.next(TIMEOUT + 30_100));
     }
 
     @Test
@@ -153,5 +155,45 @@ public final class OutputGateTest {
         assertFalse(gate.isAlertOpenEnded());
         assertEquals(OutputGate.Layer.ALERT, gate.next(10_999));
         assertEquals(OutputGate.Layer.BLANK, gate.next(11_000));
+    }
+
+    private static void drainAsserting(OutputGate gate, long from) {
+        for (int i = 0; i < OutputGate.BLANK_FRAMES; i++) {
+            assertEquals("blank frame " + i, OutputGate.Layer.BLANK, gate.next(from + i));
+        }
+    }
+
+    private static void drain(OutputGate gate, long from) {
+        for (int i = 0; i < OutputGate.BLANK_FRAMES; i++) gate.next(from + i);
+    }
+
+    @Test
+    public void theArrayIsBlankedMoreThanOnceBeforeItIsHandedBack() {
+        OutputGate gate = new OutputGate();
+        gate.startAlert(0, 10_000);
+        assertEquals(OutputGate.Layer.ALERT, gate.next(0));
+
+        for (int i = 0; i < OutputGate.BLANK_FRAMES; i++) {
+            assertEquals("blank frame " + i, OutputGate.Layer.BLANK, gate.next(10_000 + i));
+            assertEquals("released early at frame " + i,
+                    i == OutputGate.BLANK_FRAMES - 1, gate.isBlankingDone());
+        }
+        assertEquals(OutputGate.Layer.IDLE, gate.next(10_100));
+    }
+
+    @Test
+    public void anAlertEndingOwesAFreshRunOfBlankFrames() {
+        OutputGate gate = new OutputGate();
+        gate.armAmbient(0, TIMEOUT);
+        drain(gate, TIMEOUT + 1);
+        assertTrue(gate.isBlankingDone());
+
+        gate.startAlert(TIMEOUT + 1_000, 5_000);
+        assertEquals(OutputGate.Layer.ALERT, gate.next(TIMEOUT + 1_000));
+
+        for (int i = 0; i < OutputGate.BLANK_FRAMES; i++) {
+            assertEquals(OutputGate.Layer.BLANK, gate.next(TIMEOUT + 6_000 + i));
+        }
+        assertEquals(OutputGate.Layer.IDLE, gate.next(TIMEOUT + 6_100));
     }
 }

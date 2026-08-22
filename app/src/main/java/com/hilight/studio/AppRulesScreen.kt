@@ -69,15 +69,22 @@ fun AppRulesScreen(store: Store) {
     val ctx = LocalContext.current
     val rules by store.rules.collectAsStateWithLifecycle()
     val enabled by store.enabled.collectAsStateWithLifecycle()
+    val status by store.status.collectAsStateWithLifecycle()
     var picking by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<AppRule?>(null) }
     var usageMissing by remember { mutableStateOf(false) }
+    var notifMissing by remember { mutableStateOf(false) }
 
     LaunchedEffect(rules) {
         while (true) {
-            val missing = ForegroundWatcher.needsUsageAccess(ctx, rules)
-            if (!missing && usageMissing) store.syncWatcher()
-            usageMissing = missing
+            val missingUsage = LiveTriggers.needsUsageAccess(ctx, rules)
+            if (!missingUsage && usageMissing) store.syncWatcher()
+            usageMissing = missingUsage
+
+            val missingNotif = NotificationTrigger.needsAccess(ctx, rules)
+            if (!missingNotif && notifMissing) NotificationTrigger.nudge(ctx)
+            notifMissing = missingNotif
+
             delay(1500)
         }
     }
@@ -106,6 +113,33 @@ fun AppRulesScreen(store: Store) {
         }
     }
 
+    if (notifMissing) {
+        PixelCard {
+            SectionTitle("Notification access needed", trailing = { LivePill("needed", ok = false) })
+            Caption(
+                "\"On notification\" rules stay dark until HiLight can see your notifications. " +
+                    "Grant notification access to HiLight Studio, then come back."
+            )
+            FilledTonalButton(
+                onClick = {
+                    ctx.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { ButtonLabel("Open notification access") }
+        }
+    }
+
+    if (status.resting) {
+        PixelCard {
+            SectionTitle("LEDs resting", trailing = { LivePill("resting", ok = false) })
+            Caption(
+                "The array has been lit for more than half of the last ten minutes, so it is " +
+                    "cooling down. Rules stay dark until that window rolls over. A long call " +
+                    "held on the whole time is the usual cause."
+            )
+        }
+    }
+
     if (!enabled && rules.any { it.enabled }) {
         PixelCard {
             SectionTitle("HiLight is off", trailing = { LivePill("off", ok = false) })
@@ -113,7 +147,29 @@ fun AppRulesScreen(store: Store) {
         }
     }
 
-    rules.forEachIndexed { index, rule ->
+    listOf(
+        Triple(
+            rules.firstOrNull { it.trigger == Trigger.RINGING } ?: AppRule.incomingCall(),
+            "while the phone is ringing",
+            "The array stays dark for incoming calls",
+        ),
+        Triple(
+            rules.firstOrNull { it.trigger == Trigger.CALL } ?: AppRule.onCall(),
+            "while a call is connected",
+            "The array stays dark during calls",
+        ),
+    ).forEach { (rule, activeCaption, idleCaption) ->
+        CallCard(
+            rule = rule,
+            activeCaption = activeCaption,
+            idleCaption = idleCaption,
+            onToggle = { store.upsertRule(rule.copy(enabled = it)) },
+            onEdit = { editing = rule },
+            onTest = { store.preview(rule.pattern, rule.color, rule.speedMs, rule.brightness, 4_000) },
+        )
+    }
+
+    rules.filter { !it.isCall }.forEachIndexed { index, rule ->
 
         AnimatedVisibility(
             visible = true,
@@ -155,6 +211,68 @@ fun AppRulesScreen(store: Store) {
             },
             onTest = { store.preview(it.pattern, it.color, it.speedMs, it.brightness, it.durationMs) },
         )
+    }
+}
+
+@Composable
+private fun CallCard(
+    rule: AppRule,
+    activeCaption: String,
+    idleCaption: String,
+    onToggle: (Boolean) -> Unit,
+    onEdit: () -> Unit,
+    onTest: () -> Unit,
+) {
+    val haptics = LocalHapticFeedback.current
+    PixelCard {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.fillMaxWidth(0.72f)) {
+                Text(rule.label, style = MaterialTheme.typography.titleMedium)
+                Caption(
+                    if (rule.enabled) {
+                        (if (rule.randomColor) "Random colour" else rule.pattern.label) + " · " +
+                            if (rule.durationMs <= 0) activeCaption
+                            else "for ${formatDuration(rule.durationMs)}"
+                    } else {
+                        idleCaption
+                    }
+                )
+            }
+            Switch(
+                checked = rule.enabled,
+                onCheckedChange = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onToggle(it)
+                },
+            )
+        }
+        LedStrip(
+            rule.pattern,
+            Ambient(
+                pattern = rule.pattern,
+                color = rule.color,
+                speedMs = rule.speedMs,
+                brightness = rule.brightness,
+            ),
+            active = rule.enabled,
+            heightDp = 34,
+        )
+        if (rule.enabled) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                FilledTonalButton(
+                    onClick = onEdit,
+                    modifier = Modifier.weight(1f),
+                ) { ButtonLabel("Edit") }
+                FilledTonalButton(
+                    onClick = onTest,
+                    modifier = Modifier.weight(1f),
+                ) { ButtonLabel("Test") }
+            }
+        }
     }
 }
 
@@ -342,12 +460,14 @@ private fun RuleEditorDialog(
                     heightDp = 38,
                 )
 
-                SegmentedSelector(
-                    options = listOf(Trigger.NOTIFICATION, Trigger.FOREGROUND),
-                    selected = r.trigger,
-                    label = { if (it == Trigger.NOTIFICATION) "On notification" else "While open" },
-                    onSelect = { r = r.copy(trigger = it) },
-                )
+                if (!r.isCall) {
+                    SegmentedSelector(
+                        options = listOf(Trigger.NOTIFICATION, Trigger.FOREGROUND),
+                        selected = r.trigger,
+                        label = { if (it == Trigger.NOTIFICATION) "On notification" else "While open" },
+                        onSelect = { r = r.copy(trigger = it) },
+                    )
+                }
 
                 PatternCarousel(
                     selected = r.pattern,
@@ -358,6 +478,25 @@ private fun RuleEditorDialog(
                 ToggleRow("Random colour each time", r.randomColor) { r = r.copy(randomColor = it) }
                 if (!r.randomColor) {
                     ColorPicker(r.color, { r = r.copy(color = it) })
+                }
+
+                if (r.isCall) {
+                    ToggleRow("Keep lit for the whole call", r.durationMs <= 0) {
+                        r = r.copy(durationMs = if (it) 0 else Limits.RULE_DEFAULT_MS)
+                    }
+                    if (r.durationMs > 0) {
+                        PixelSlider(
+                            "Show for",
+                            r.durationMs.toFloat(),
+                            2_000f..Limits.RULE_MAX_MS.toFloat(),
+                            { r = r.copy(durationMs = it.toInt()) },
+                        ) { formatDuration(it.toInt()) }
+                    } else {
+                        Caption(
+                            "The array may only be lit for half of any ten-minute window. A long " +
+                                "call uses that up, and every later rule stays dark until it recovers."
+                        )
+                    }
                 }
 
                 if (r.trigger == Trigger.NOTIFICATION) {

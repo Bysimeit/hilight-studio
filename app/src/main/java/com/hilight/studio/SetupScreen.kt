@@ -74,14 +74,17 @@ fun SetupScreen(store: Store) {
     val screenOffOnly by store.screenOffOnly.collectAsStateWithLifecycle()
 
     val rules by store.rules.collectAsStateWithLifecycle()
-    var notifAccess by remember { mutableStateOf(hasNotificationAccess(ctx)) }
-    var usageAccess by remember { mutableStateOf(ForegroundWatcher.hasUsageAccess(ctx)) }
+    var notifAccess by remember { mutableStateOf(NotificationTrigger.hasAccess(ctx)) }
+    var usageAccess by remember { mutableStateOf(LiveTriggers.hasUsageAccess(ctx)) }
     val usageNeeded = rules.any { it.enabled && it.trigger == Trigger.FOREGROUND }
+    val notifNeeded = rules.any { it.enabled && it.trigger == Trigger.NOTIFICATION }
 
     LaunchedEffect(Unit) {
         while (true) {
-            notifAccess = hasNotificationAccess(ctx)
-            val access = ForegroundWatcher.hasUsageAccess(ctx)
+            val notif = NotificationTrigger.hasAccess(ctx)
+            if (notif && !notifAccess) NotificationTrigger.nudge(ctx)
+            notifAccess = notif
+            val access = LiveTriggers.hasUsageAccess(ctx)
             if (access && !usageAccess) store.syncWatcher()
             usageAccess = access
             store.shizuku.refresh()
@@ -185,9 +188,18 @@ fun SetupScreen(store: Store) {
     PixelCard {
         SectionTitle(
             "Notification access",
-            trailing = { LivePill(if (notifAccess) "granted" else "needed", notifAccess) },
+            trailing = {
+                LivePill(
+                    when {
+                        notifAccess -> "granted"
+                        notifNeeded -> "needed"
+                        else -> "optional"
+                    },
+                    notifAccess,
+                )
+            },
         )
-        Caption("Lets rules see which app notified you.")
+        Caption("Required by \"on notification\" rules; nothing else uses it.")
         FilledTonalButton(
             onClick = { ctx.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
         ) { ButtonLabel("Open notification access") }
@@ -228,7 +240,11 @@ fun SetupScreen(store: Store) {
 
     PixelCard {
         SectionTitle("Session priority")
-        Caption("Raise if the system's own effects interrupt yours; lower to let them win.")
+        Caption(
+            "Raise if the system's own effects interrupt yours; lower to let them win. " +
+                "Calls are where this bites: the phone has its own HiLight animation for them, " +
+                "and at equal priority the two are interleaved."
+        )
         PixelSlider("Priority", priority.toFloat(), -10f..10f, { store.setPriority(it.toInt()) }) {
             it.toInt().toString()
         }
@@ -556,8 +572,3 @@ private fun pickTime(ctx: Context, currentMinutes: Int, onPicked: (Int) -> Unit)
     ).show()
 }
 
-private fun hasNotificationAccess(ctx: Context): Boolean {
-    val flat = Settings.Secure.getString(ctx.contentResolver, "enabled_notification_listeners")
-        ?: return false
-    return flat.contains(ctx.packageName)
-}

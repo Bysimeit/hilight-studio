@@ -6,13 +6,18 @@ import android.os.Binder;
 import android.os.IBinder;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class LightsBackend {
+    private static final long DEFAULT_MIN_UPDATE_MS = 33;
+
     private final IBinder token = new Binder();
     private Object service;
     private Method mGetLights, mOpenSession, mCloseSession, mSetLightStates;
     private int[] ids = new int[0];
+    private long minUpdatePeriodMs = DEFAULT_MIN_UPDATE_MS;
     private boolean sessionOpen;
     private int sessionPriority = Integer.MIN_VALUE;
 
@@ -30,17 +35,28 @@ public final class LightsBackend {
 
         @SuppressWarnings("unchecked")
         List<Light> all = (List<Light>) mGetLights.invoke(service);
-        int n = 0;
-        for (Light l : all) if (l.getType() == Light.LIGHT_TYPE_APPLICATION) n++;
-        ids = new int[n];
-        int k = 0;
-        for (Light l : all) if (l.getType() == Light.LIGHT_TYPE_APPLICATION) ids[k++] = l.getId();
-        describe(all);
+        List<Light> array = new ArrayList<>();
+        for (Light l : all) if (l.getType() == Light.LIGHT_TYPE_APPLICATION) array.add(l);
+        array.sort(Comparator.comparingInt(Light::getOrdinal));
+
+        ids = new int[array.size()];
+        for (int i = 0; i < array.size(); i++) ids[i] = array.get(i).getId();
+
+        long slowest = 0;
+        for (Light l : array) {
+            try {
+                slowest = Math.max(slowest, l.getMinUpdatePeriodMillis());
+            } catch (Throwable ignored) {
+            }
+        }
+        minUpdatePeriodMs = slowest > 0 ? slowest : DEFAULT_MIN_UPDATE_MS;
+        describe(array);
     }
+
+    public long minUpdatePeriodMs() { return minUpdatePeriodMs; }
 
     private void describe(List<Light> all) {
         for (Light l : all) {
-            if (l.getType() != Light.LIGHT_TYPE_APPLICATION) continue;
             String period;
             try {
                 period = l.getMinUpdatePeriodMillis() + "ms";
