@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="tab_live">Direct</string>
+    <string name="tab_style">Style</string>
+    <string name="tab_apps">Applis</string>
+    <string name="tab_setup">Config</string>
+
+    <string name="pattern_off">Éteint</string>
+    <string name="pattern_solid">Uni</string>
+    <string name="pattern_gradient">Dégradé</string>
+    <string name="pattern_breathe">Respiration</string>
+    <string name="pattern_blink">Clignotement</string>
+    <string name="pattern_pulse">Impulsion</string>
+    <string name="pattern_chase">Poursuite</string>
+    <string name="pattern_comet">Comète</string>
+    <string name="pattern_wave">Vague</string>
+    <string name="pattern_rainbow">Arc-en-ciel</string>
+    <string name="pattern_rainbow_short">Arc-en-ciel</string>
+    <string name="pattern_random">Couleurs aléatoires</string>
+    <string name="pattern_custom">Par LED</string>
+
+    <string name="cycle_breathe">Une respiration complète : monte jusqu\'au maximum, puis redescend.</string>
+    <string name="cycle_blink">Une paire allumé puis éteint, allumé sur la première moitié.</string>
+    <string name="cycle_pulse">Un éclat : passe au maximum, puis s\'estompe.</string>
+    <string name="cycle_chase">Un tour d\'une seule LED allumée sur les huit.</string>
+    <string name="cycle_comet">Un tour de la tête de comète, sa traîne suivant sur 3 LEDs.</string>
+    <string name="cycle_wave">Une vague traversant l\'array une fois.</string>
+    <string name="cycle_rainbow">Un passage par toutes les teintes, retour au départ.</string>
+
+    <string name="suppression_quiet_hours">Heures calmes</string>
+    <string name="suppression_low_battery">Batterie faible</string>
+    <string name="suppression_power_saver">Économiseur de batterie</string>
+    <string name="suppression_screen_on">Écran éteint uniquement</string>
+
+    <string name="transport_auto">Auto</string>
+    <string name="transport_shizuku">Shizuku</string>
+    <string name="transport_adb">Assistant ADB</string>
+
+    <string name="duration_ms">%1$d ms</string>
+    <string name="duration_seconds_fraction">%1$s s</string>
+    <string name="duration_seconds">%1$d s</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="duration_minutes_seconds">%1$d min %2$d s</string>
+
+    <string name="common_cancel">Annuler</string>
+    <string name="common_save">Enregistrer</string>
+    <string name="common_close">Fermer</string>
+    <string name="common_edit">Modifier</string>
+    <string name="common_test">Tester</string>
+    <string name="common_delete">Supprimer</string>
+    <string name="common_continue">Continuer</string>
+    <string name="common_keep_it_short">Restez bref</string>
+    <string name="common_none">aucun</string>
+    <string name="common_i_understand">J\'ai compris</string>
+    <string name="common_off_lowercase">éteint</string>
+    <string name="common_percent">%1$d %%</string>
+
+    <string name="device_generic">cet appareil</string>
+
+</resources>

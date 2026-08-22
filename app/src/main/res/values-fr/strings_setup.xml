@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="setup_auto_off_title">Extinction automatique</string>
+    <string name="setup_auto_off_body">Le style permanent s\'éteint de lui-même après ce délai. Les règles d\'applis continuent de fonctionner.</string>
+    <string name="setup_auto_off_protection">La protection matérielle est toujours active : la luminosité baisse progressivement après 10 s d\'éclairage continu, et l\'array se met en repos s\'il a été allumé plus de la moitié des 10 dernières minutes.</string>
+    <string name="setup_stay_on_for">Rester allumé pendant</string>
+    <string name="setup_allow_five_minutes">Autoriser jusqu\'à 5 minutes</string>
+    <string name="setup_warn_long_title">Plus de 30 secondes ?</string>
+    <string name="setup_warn_long_body">Les LEDs consomment tant qu\'elles sont allumées, et le HiLight d\'origine ne fait que clignoter un instant. Rien dans le matériel n\'est prévu pour des minutes d\'éclairage continu.</string>
+    <string name="setup_warn_long_confirm_title">Vous êtes sûr ?</string>
+    <string name="setup_warn_long_confirm_body">Jusqu\'à 5 minutes d\'éclairage continu coûteront de la batterie, et les animations se figent allumées si le téléphone se met en veille. Vous pouvez rebaisser ce réglage à tout moment.</string>
+
+    <string name="setup_dark_title">Quand rester éteint</string>
+    <string name="setup_screen_off_only">Uniquement quand l\'écran est éteint</string>
+    <string name="setup_quiet_from">De %1$s</string>
+    <string name="setup_quiet_until">À %1$s</string>
+    <string name="setup_quiet_dim">Atténuer au lieu d\'éteindre</string>
+    <string name="setup_dim_to">Atténuer à</string>
+    <string name="setup_respect_dnd">Respecter Ne pas déranger</string>
+    <string name="setup_pause_saver">Suspendre en économiseur de batterie</string>
+    <string name="setup_pause_low_battery">Suspendre si la batterie est faible</string>
+    <string name="setup_pause_below">Suspendre en dessous de</string>
+    <string name="setup_battery_note">Ignoré pendant la charge. L\'économiseur de batterie suspend dans tous les cas.</string>
+    <string name="setup_percent">%1$d %%</string>
+
+    <string name="setup_privileged_title">Accès privilégié</string>
+    <string name="setup_privileged_body">Le renderer a besoin des privilèges de l\'UID shell. Choisissez comment il démarre.</string>
+    <string name="setup_transport_auto_note">Préfère Shizuku, se rabat sur ADB.</string>
+
+    <string name="shizuku_state_connected">connecté</string>
+    <string name="shizuku_state_connecting">connexion…</string>
+    <string name="shizuku_state_needs_permission">à approuver</string>
+    <string name="shizuku_state_not_running">non lancé</string>
+    <string name="shizuku_state_not_installed">non installé</string>
+    <string name="shizuku_state_failed">échec</string>
+    <string name="shizuku_reattach_note">Après un redémarrage de Shizuku (ou du téléphone), rouvrez cette appli une fois pour vous rattacher.</string>
+    <string name="shizuku_not_installed_body">Aucun ordinateur nécessaire : lancez-le via le débogage sans fil.</string>
+    <string name="shizuku_get">Obtenir Shizuku</string>
+    <string name="shizuku_not_running_body">Lancez-le via le débogage sans fil. À refaire après chaque redémarrage.</string>
+    <string name="shizuku_open">Ouvrir Shizuku</string>
+    <string name="shizuku_check_again">Vérifier à nouveau</string>
+    <string name="shizuku_needs_permission_body">En cours d\'exécution. Approuvez cette appli pour l\'utiliser.</string>
+    <string name="shizuku_request_access">Demander l\'accès</string>
+    <string name="shizuku_connected_body">Renderer en cours dans le processus UID shell de Shizuku.</string>
+    <string name="shizuku_disconnect">Déconnecter</string>
+    <string name="shizuku_error_dead_binder">le service a renvoyé un binder mort</string>
+    <string name="shizuku_error_too_old">Shizuku est trop ancien ; la v11 ou plus récente est requise</string>
+    <string name="shizuku_unreachable">Impossible de joindre Shizuku.</string>
+    <string name="shizuku_retry">Réessayer</string>
+    <string name="setup_no_browser">Aucun navigateur disponible</string>
+
+    <string name="adb_title">ADB</string>
+    <string name="adb_body">Exécutez les deux lignes avec le téléphone branché. Rien à transférer. À relancer après un redémarrage, et la première ligne compte à chaque fois, car un renderer résiduel garde l\'array éteint.</string>
+    <string name="adb_shells_note">Fonctionne dans Terminal sur macOS et Linux, et dans PowerShell. Dans l\'invite de commandes Windows, copiez plutôt la version cmd.exe, qui n\'a pas de guillemets simples.</string>
+    <string name="adb_copy">Copier</string>
+    <string name="adb_copy_cmd">Copier pour cmd.exe</string>
+    <string name="adb_copied">Commande copiée</string>
+    <string name="adb_copied_cmd">Version cmd.exe copiée</string>
+    <string name="adb_verify_note">Ça a marché si l\'array réagit. Aucun affichage signifie qu\'il n\'a pas démarré.</string>
+    <string name="adb_send">Envoyer vers l\'ordinateur</string>
+    <string name="adb_share_title">Envoyer la commande</string>
+
+    <string name="setup_notif_title">Accès aux notifications</string>
+    <string name="setup_state_granted">accordé</string>
+    <string name="setup_state_needed">requis</string>
+    <string name="setup_notif_body">Permet aux règles de voir quelle appli vous a notifié.</string>
+    <string name="setup_open_notif_access">Ouvrir l\'accès aux notifications</string>
+    <string name="setup_inspector_body">Montre ce que HiLight lit de chaque notification. Aucun texte de message.</string>
+    <string name="setup_inspector_button">Inspecteur de notifications</string>
+    <string name="setup_chats_none">Aucune conversation mémorisée pour l\'instant. Elles sont listées ici pour que les règles par contact ne demandent aucune saisie.</string>
+    <string name="setup_chats_remembered">%1$d noms de conversations mémorisés sur cet appareil, pour que les règles par contact ne demandent aucune saisie. Les règles existantes continuent de fonctionner si vous les effacez.</string>
+    <string name="setup_forget_chats_button">Oublier les conversations mémorisées</string>
+    <string name="setup_forget_chats_title">Oublier les conversations mémorisées ?</string>
+    <string name="setup_forget_chats_body">La liste proposée par le sélecteur par contact sera effacée. Les règles déjà créées continuent de fonctionner, et les conversations sont à nouveau mémorisées à mesure que les messages arrivent.</string>
+    <string name="setup_forget_chats_confirm">Les oublier</string>
+    <string name="setup_forget_chats_dismiss">Les garder</string>
+
+    <string name="setup_usage_title">Accès aux données d\'utilisation</string>
+    <string name="setup_state_optional">facultatif</string>
+    <string name="setup_usage_body">Uniquement pour les règles « appli ouverte ».</string>
+    <string name="setup_open_usage_access">Ouvrir l\'accès aux données d\'utilisation</string>
+
+    <string name="setup_appearance_title">Apparence</string>
+    <string name="setup_wallpaper_colours">Couleurs du fond d\'écran</string>
+
+    <string name="setup_test_title">Test de bout en bout</string>
+    <string name="setup_test_body">Publie une notification depuis cette appli. Ajoutez d\'abord une règle pour HiLight Studio.</string>
+    <string name="setup_test_button">Publier une notification de test</string>
+    <string name="setup_selftest_channel">Autotest</string>
+    <string name="setup_selftest_title">Autotest HiLight</string>
+    <string name="setup_selftest_body">Si une règle existe pour cette appli, les LEDs viennent de se déclencher</string>
+
+    <string name="setup_priority_title">Priorité de session</string>
+    <string name="setup_priority_body">Augmentez-la si les effets propres au système interrompent les vôtres ; baissez-la pour les laisser gagner.</string>
+    <string name="setup_priority_label">Priorité</string>
+    <string name="setup_priority_calls">C\'est sur les appels que ça se joue : le téléphone a sa propre animation HiLight pour eux, et à priorité égale les deux s\'entremêlent.</string>
+
+</resources>

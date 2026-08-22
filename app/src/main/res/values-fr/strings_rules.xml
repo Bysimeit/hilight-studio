@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="rules_section_title">Règles par appli</string>
+    <string name="rules_intro_apps">Choisissez une appli, puis ce que fait HiLight quand elle vous notifie, ou pendant qu\'elle est ouverte.</string>
+    <string name="rules_intro_messaging">Les applis de messagerie vont plus loin : une couleur pour un seul contact ou une seule conversation.</string>
+    <string name="rules_add">Ajouter une règle</string>
+    <string name="rules_card_summary">%1$s · %2$s</string>
+    <string name="rules_random_colour">Couleur aléatoire</string>
+    <string name="rules_trigger_notification_short">sur notification</string>
+    <string name="rules_trigger_foreground_short">appli ouverte</string>
+    <string name="rules_last_matched">Dernière correspondance %1$s</string>
+    <string name="rules_not_matched_yet">Aucune correspondance pour l\'instant</string>
+    <string name="rules_badge_groups_too">Groupes aussi</string>
+    <string name="rules_picker_title">Choisir une appli</string>
+    <string name="rules_picker_search">Rechercher</string>
+    <string name="rules_any_app">Toute appli</string>
+    <string name="rules_any_app_caption">Règle par défaut pour les applis sans règle propre</string>
+    <string name="rules_editor_title_chat">%1$s › %2$s</string>
+    <string name="rules_per_chat_notifications_only">Les règles par conversation se déclenchent sur les notifications.</string>
+    <string name="rules_trigger_notification">Sur notification</string>
+    <string name="rules_trigger_foreground">Appli ouverte</string>
+    <string name="rules_random_colour_each_time">Couleur aléatoire à chaque fois</string>
+    <string name="rules_chat_is_group">Cette conversation est un groupe : tout ce qui y est publié déclenche la règle.</string>
+    <string name="rules_include_groups">Aussi quand la personne écrit dans un groupe</string>
+    <string name="rules_include_groups_hint">Désactivé, seule sa conversation privée prend cette couleur : les groupes auxquels elle participe restent éteints.</string>
+    <string name="rules_keyword_label">Seulement si le message contient (facultatif)</string>
+    <string name="rules_only_screen_off">Uniquement quand l\'écran est éteint</string>
+    <string name="rules_time_per_cycle">Durée d\'un cycle</string>
+    <string name="rules_brightness">Luminosité</string>
+    <string name="rules_test_on_leds">Tester sur les LEDs</string>
+    <string name="rules_show_for">Afficher pendant</string>
+    <string name="rules_allow_one_minute">Autoriser jusqu\'à 1 minute</string>
+    <string name="rules_duration_warn_first_title">Plus de 30 secondes ?</string>
+    <string name="rules_duration_warn_first_body">Chaque notification de cette appli allumerait l\'array aussi longtemps, ce qui coûte de la batterie et va bien au-delà de ce que fait HiLight d\'origine.</string>
+    <string name="rules_duration_warn_second_title">Vous êtes sûr ?</string>
+    <string name="rules_duration_warn_second_body">Une appli bavarde peut se déclencher souvent : les LEDs risquent de rester allumées la plupart du temps. Vous pouvez rebaisser ce réglage à tout moment.</string>
+    <string name="rules_replace_warning">Une règle existante pour cette appli couvre déjà ce cas, et l\'enregistrement remplacera ses réglages par ceux-ci.</string>
+    <string name="rules_match_by_id">Correspondance par identifiant de conversation, qui survit à un changement de nom.</string>
+    <string name="rules_match_id_dropped">L\'identifiant de conversation enregistré sera abandonné, et un nouveau sera appris au prochain message de cette conversation.</string>
+    <string name="rules_match_by_name">Correspondance par nom : renommer la conversation dans %1$s peut donc l\'empêcher de fonctionner.</string>
+    <string name="rules_relearn_chat">Réapprendre cette conversation</string>
+    <string name="rules_relearn_hint">Oublie l\'identifiant enregistré et se base sur le nom, en reprenant le nouvel identifiant au prochain message. C\'est le remède quand un identifiant a changé après une réinstallation ou une sauvegarde restaurée.</string>
+
+    <string name="chat_scope_title">Que doit couvrir cette règle ?</string>
+    <string name="chat_scope_whole_app">Toutes les notifications de %1$s</string>
+    <string name="chat_scope_whole_app_hint">N\'importe quelle conversation, n\'importe quel expéditeur.</string>
+    <string name="chat_scope_one_chat">Un contact ou une conversation</string>
+    <string name="chat_scope_one_chat_hint">Une couleur rien que pour eux, choisie parmi les conversations vues par HiLight.</string>
+    <string name="chat_picker_title">Choisir une conversation</string>
+    <string name="chat_picker_intro">Quelle conversation de %1$s cette règle surveille.</string>
+    <string name="chat_seen_list_header">Conversations vues par HiLight, de la plus récente à la plus ancienne.</string>
+    <string name="chat_no_chats_yet">Aucune conversation à lister : HiLight n\'a pas encore vu de message de %1$s.</string>
+    <string name="chat_badge_group">Groupe</string>
+    <string name="chat_last_message">Dernier message %1$s</string>
+    <string name="chat_learn_next">Apprendre le prochain message</string>
+    <string name="chat_learn_next_hint">La méthode la plus sûre. Le nom vient d\'une vraie notification : c\'est donc exactement ce que HiLight comparera ensuite.</string>
+    <string name="chat_pick_contact">Choisir dans les contacts</string>
+    <string name="chat_pick_contact_hint">Ouvre le sélecteur système : HiLight ne lit que le contact que vous touchez, jamais votre carnet d\'adresses. Si l\'appli affiche un autre nom pour cette personne, la règle peut échouer.</string>
+    <string name="chat_listening">À l\'écoute</string>
+    <string name="chat_waiting">En attente du prochain message de %1$s…</string>
+    <string name="chat_waiting_hint">Ouvrez la conversation voulue et envoyez quelque chose, ou attendez qu\'on vous écrive.</string>
+    <string name="chat_stop_waiting">Arrêter d\'attendre</string>
+    <string name="chat_captured">Capturé : %1$s. Utiliser cette conversation ?</string>
+    <string name="chat_captured_has_id">Cette conversation est venue avec un identifiant stable : la renommer ne cassera pas la règle.</string>
+    <string name="chat_captured_no_id">Aucun identifiant n\'est venu avec : la règle se basera sur le nom.</string>
+    <string name="chat_use_this">Utiliser cette conversation</string>
+    <string name="chat_wait_another">Attendre la suivante</string>
+    <string name="chat_not_listening">Pas à l\'écoute</string>
+    <string name="chat_no_access_title">HiLight ne peut pas encore guetter le prochain message.</string>
+    <string name="chat_no_access_body">Sans l\'accès aux notifications, HiLight n\'en voit aucune, et Android retire cet accès de lui-même quand une appli est restée inutilisée un certain temps.</string>
+    <string name="chat_open_notification_access">Ouvrir l\'accès aux notifications</string>
+    <string name="chat_contact_no_name">Ce contact n\'avait aucun nom lisible. Essayez l\'une des deux autres méthodes.</string>
+    <string name="chat_unusable">Cette conversation n\'a ni nom comparable ni identifiant stable : une règle pour elle ne pourrait jamais se déclencher. Une règle pour toute l\'appli fonctionne quand même.</string>
+    <string name="chat_ago_just_now">à l\'instant</string>
+    <string name="chat_ago_over_a_week">il y a plus d\'une semaine</string>
+    <string name="chat_ago_unknown">il y a un moment</string>
+    <plurals name="chat_ago_minutes">
+        <item quantity="one">il y a %1$d min</item>
+        <item quantity="other">il y a %1$d min</item>
+    </plurals>
+    <plurals name="chat_ago_hours">
+        <item quantity="one">il y a %1$d heure</item>
+        <item quantity="other">il y a %1$d heures</item>
+    </plurals>
+    <string name="chat_ago_yesterday">hier</string>
+    <plurals name="chat_ago_days">
+        <item quantity="one">il y a %1$d jour</item>
+        <item quantity="other">il y a %1$d jours</item>
+    </plurals>
+
+    <string name="rules_call_ringing">Appel entrant</string>
+    <string name="rules_call_ringing_active">pendant que le téléphone sonne</string>
+    <string name="rules_call_ringing_idle">L\'array reste éteint pour les appels entrants</string>
+    <string name="rules_call_connected">En appel</string>
+    <string name="rules_call_connected_active">pendant un appel en cours</string>
+    <string name="rules_call_connected_idle">L\'array reste éteint pendant les appels</string>
+    <string name="rules_call_hold">Garder allumé pendant tout l\'appel</string>
+    <string name="rules_call_duty_warning">L\'array ne peut être allumé que la moitié de n\'importe quelle fenêtre de dix minutes. Un appel long épuise ce quota, et toute règle suivante reste éteinte jusqu\'à récupération.</string>
+    <string name="rules_duration_for">pendant %1$s</string>
+    <string name="rules_usage_needed_title">Accès aux données d\'utilisation requis</string>
+    <string name="rules_usage_needed_body">Les règles « appli ouverte » restent éteintes tant que HiLight ne peut pas voir quelle appli est au premier plan. Accordez l\'accès aux données d\'utilisation à HiLight Studio, puis revenez.</string>
+    <string name="rules_notif_needed_title">Accès aux notifications requis</string>
+    <string name="rules_notif_needed_body">Les règles « sur notification » restent éteintes tant que HiLight ne peut pas voir vos notifications. Accordez l\'accès aux notifications à HiLight Studio, puis revenez.</string>
+    <string name="rules_needed_pill">requis</string>
+    <string name="rules_resting_title">LEDs en repos</string>
+    <string name="rules_resting_pill">en repos</string>
+    <string name="rules_resting_body">L\'array a été allumé plus de la moitié des dix dernières minutes : il refroidit. Les règles restent éteintes jusqu\'au renouvellement de cette fenêtre. Un appel long gardé allumé tout du long en est la cause habituelle.</string>
+    <string name="rules_off_title">HiLight est désactivé</string>
+    <string name="rules_off_pill">désactivé</string>
+    <string name="rules_off_body">Les règles ne fonctionnent que lorsque HiLight est activé. Activez-le depuis l\'onglet Direct.</string>
+
+</resources>

@@ -212,4 +212,5 @@
     <!-- "Priority" -->
     <string name="setup_priority_label">優先度</string>
 
+    <string name="setup_priority_calls">差が出るのは通話です。通話用の HiLight 演出をシステム自体が持っており、優先度が同じだと両方が入り交じります。</string>
 </resources>

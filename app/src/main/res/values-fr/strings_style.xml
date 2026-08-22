@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="style_always_on_style">Style permanent</string>
+    <string name="style_control_off_warning">Le contrôle est désactivé. Activez-le dans Direct pour voir le résultat sur le matériel.</string>
+
+    <string name="style_change_every">Changer toutes les</string>
+    <string name="style_colour_per_led">Une couleur par LED</string>
+    <string name="style_fade_between_colours">Fondu entre les couleurs</string>
+    <string name="style_saturation">Saturation</string>
+
+    <string name="style_rainbow_spread">Étaler sur l\'array</string>
+    <string name="style_rainbow_spread_off">Désactivé, toutes les LEDs prennent la même teinte et défilent ensemble.</string>
+
+    <string name="style_per_led_colours">Couleurs par LED</string>
+    <string name="style_per_led_hint">La LED 1 est la plus proche du flash. Touchez-en une, puis choisissez sa couleur.</string>
+    <string name="style_led_number">LED %1$d</string>
+    <string name="style_rotate_around_array">Faire tourner sur l\'array</string>
+    <string name="style_rotate_off">désactivé</string>
+    <string name="style_wallpaper">Fond d\'écran</string>
+
+    <string name="style_gradient_start">Début</string>
+    <string name="style_gradient_end">Fin</string>
+
+    <string name="style_off_body">L\'array reste éteint jusqu\'à ce qu\'une règle d\'appli se déclenche.</string>
+
+    <string name="style_colour">Couleur</string>
+
+    <string name="style_timing">Cadence</string>
+    <string name="style_time_per_cycle">Durée d\'un cycle</string>
+    <string name="style_shorter_is_faster">Plus court est plus rapide.</string>
+    <string name="style_brightness">Luminosité</string>
+    <string name="style_brightness_note">Les LEDs n\'ont pas de canal de luminosité : ce réglage met à l\'échelle les valeurs RVB.</string>
+
+    <string name="style_percent">%1$d %%</string>
+
+    <string name="style_presets">Préréglages</string>
+    <string name="style_presets_saved">%1$d enregistré(s)</string>
+    <string name="style_presets_empty">Enregistrez le style actuel pour y revenir plus tard.</string>
+    <string name="style_export">Exporter</string>
+    <string name="style_import">Importer</string>
+    <string name="style_name_this_look">Nommer ce style</string>
+    <string name="style_name_field">Nom</string>
+    <string name="style_preset_default_name">Préréglage %1$d</string>
+    <string name="style_paste_exported_presets">Coller des préréglages exportés</string>
+    <string name="style_import_json_field">JSON</string>
+    <string name="style_import_failed">Ce JSON n\'a pas pu être lu</string>
+    <string name="style_import_count">%1$d importé(s)</string>
+    <string name="style_export_chooser">Exporter les préréglages</string>
+
+</resources>
