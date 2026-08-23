@@ -52,6 +52,9 @@ class Store private constructor(private val app: Context) {
     private val _screenOffOnly = MutableStateFlow(prefs.getBoolean("screenOffOnly", false))
     val screenOffOnly: StateFlow<Boolean> = _screenOffOnly.asStateFlow()
 
+    private val _autoStart = MutableStateFlow(prefs.getBoolean("autoStart", false))
+    val autoStart: StateFlow<Boolean> = _autoStart.asStateFlow()
+
     private val _batteryGuard = MutableStateFlow(prefs.getBoolean("batteryGuard", true))
     val batteryGuard: StateFlow<Boolean> = _batteryGuard.asStateFlow()
 
@@ -144,6 +147,7 @@ class Store private constructor(private val app: Context) {
     init {
         Bridge.ensureFiles(app)
         AdbAccess.ensure(app)
+        AdbAccess.watchWirelessDebugging(app)
         _suppression.value = suppressionNow()
 
         main.post(object : Runnable {
@@ -252,6 +256,13 @@ class Store private constructor(private val app: Context) {
         prefs.edit().putBoolean("screenOffOnly", v).apply()
         pushCurrent()
     }
+
+    fun setAutoStart(v: Boolean) {
+        _autoStart.value = v
+        prefs.edit().putBoolean("autoStart", v).apply()
+    }
+
+    fun autoStartEnabled(): Boolean = _autoStart.value
 
     fun setBatteryGuard(enabled: Boolean, minPct: Int = _batteryMinPct.value) {
         _batteryGuard.value = enabled

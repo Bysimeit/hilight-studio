@@ -67,6 +67,26 @@ the same English term must not appear as two different Japanese words on two scr
 | test | テスト | |
 | forget | 削除 | 忘れる reads oddly for data |
 
+## The Built-in access card
+
+Extracted from `SetupScreen.kt` into `builtin_*` and translated, so it now follows the phone's
+language like every other screen. Terms settled while doing it:
+
+| English | Japanese | Note |
+|---|---|---|
+| built-in access | 内蔵アクセス | the card's own name |
+| debug daemon | デバッグデーモン | the thing that must keep running |
+| wireless debugging | ワイヤレスデバッグ | Android's own Japanese |
+| USB debugging | USB デバッグ | Android's own Japanese |
+| pairing / to pair | ペア設定 / ペア設定する | as the Wireless debugging screen names it |
+| pairing code | ペア設定コード | |
+| loopback address | ループバックアドレス | |
+| developer options | 開発者向けオプション | Android's own Japanese |
+
+The two sentences about keeping a debug switch on are the longest strings in the app. They are
+explanations rather than labels, so です・ます and 。 apply and length is not a problem; the
+shortness rule below is about pills and buttons.
+
 ## Formatting
 
 - Numbers and units: `10秒`, `1分30秒`, `300ミリ秒`, `50%` — no space between number and unit, which

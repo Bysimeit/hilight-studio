@@ -135,4 +135,53 @@
     <string name="setup_priority_body">Raise if the system\'s own effects interrupt yours; lower to let them win.</string>
     <string name="setup_priority_label">Priority</string>
     <string name="setup_priority_calls">Calls are where this bites: the phone has its own HiLight animation for them, and at equal priority the two are interleaved.</string>
+    <!-- The Built-in access card: HiLight pairing with the phone's own debug daemon. -->
+    <string name="builtin_title">Built-in access</string>
+    <string name="builtin_state_unknown">checking</string>
+    <string name="builtin_state_local_network">needs local network</string>
+    <string name="builtin_state_developer_off">developer options off</string>
+    <string name="builtin_state_wireless_off">wireless debugging off</string>
+    <string name="builtin_state_not_paired">not paired</string>
+    <string name="builtin_state_connecting">connecting</string>
+    <string name="builtin_state_connected">connected</string>
+    <string name="builtin_state_failed">failed</string>
+    <string name="builtin_local_network_body">Android needs your permission for HiLight Studio to reach the phone\'s own debug service on the local network. Nothing leaves the device.</string>
+    <string name="builtin_allow_local_network">Allow local network</string>
+    <string name="builtin_developer_body">Turn on Developer options first: Settings, About phone, then tap Build number seven times.</string>
+    <string name="builtin_open_about_phone">Open About phone</string>
+    <string name="builtin_wireless_body">Turn on Wireless debugging and stay on Wi-Fi. HiLight talks to the on-device debug service over the loopback address, so no computer is involved.</string>
+    <!-- Why one debug switch has to stay on: the renderer is started by the debug daemon, and
+         Android stops a daemon by killing everything it started. -->
+    <string name="builtin_wireless_keep_on">The renderer is started by the debug daemon and Android stops a daemon by killing everything it started, so the daemon has to keep running. Either switch does that: turn USB debugging on and this one can go back off. HiLight starts a fresh renderer as soon as it comes back on.</string>
+    <string name="builtin_open_wireless">Open Wireless debugging</string>
+    <string name="builtin_pairing_body">One-time pairing. Tap below, then in Wireless debugging choose \"Pair device with pairing code\" and leave that dialog open \u2014 a HiLight notification will ask you for the six digits.</string>
+    <string name="builtin_pair">Pair with this phone</string>
+    <string name="builtin_no_notifications_body">Notifications from HiLight Studio are turned off, so the code prompt cannot appear. Turn them on to pair.</string>
+    <string name="builtin_turn_on_notifications">Turn on notifications</string>
+    <string name="builtin_working_body">Finding the debug service and starting the renderer.</string>
+    <string name="builtin_ready_body">The renderer is running in a shell-UID process. Pairing is remembered, so this comes back on its own after a reboot.</string>
+    <string name="builtin_ready_keep_on">Keep one debug switch on. The renderer does not outlive the debug daemon, and the daemon runs while either Wireless or USB debugging is enabled \u2014 so Wireless debugging can go off once USB debugging is on. Turning both off takes the array with them.</string>
+    <string name="builtin_restart_renderer">Restart renderer</string>
+    <string name="builtin_forget_pairing">Forget pairing</string>
+    <string name="builtin_failed_body">Could not reach the on-device debug service.</string>
+    <string name="builtin_failed_hint">Wireless debugging must be on and the phone must be on a Wi-Fi network for the service to be discoverable.</string>
+    <string name="builtin_try_again">Try again</string>
+    <string name="builtin_wireless_debugging">Wireless debugging</string>
+    <string name="builtin_unknown_body">Checking whether the renderer is reachable.</string>
+    <string name="builtin_connect">Connect</string>
+    <string name="builtin_show_manual">Use a computer instead</string>
+    <string name="builtin_hide_manual">Hide computer fallback</string>
+    <!-- The opt-in that lets HiLight turn Wireless debugging on at boot and back off afterwards. -->
+    <string name="builtin_autostart_title">Start on its own after a reboot</string>
+    <string name="builtin_autostart_body">HiLight turns Wireless debugging on just long enough to start a renderer, then turns it back off.</string>
+    <string name="builtin_autostart_needs_permission">Needs one more permission, which only the renderer can give. Tap Restart renderer below and this becomes available.</string>
+    <string name="builtin_autostart_needs_usb">Needs USB debugging on. Without it there is no daemon left once Wireless debugging goes back off, and the renderer would be killed the moment it started.</string>
+    <string name="builtin_open_developer_options">Open Developer options</string>
+    <!-- Pairing progress, shown under the pair button. -->
+    <string name="builtin_pairing_searching">Waiting for the pairing dialog to appear.</string>
+    <string name="builtin_pairing_waiting_code">Enter the six digits in the HiLight notification.</string>
+    <string name="builtin_pairing_pairing">Pairing and starting the renderer.</string>
+    <string name="builtin_pairing_done">Paired.</string>
+    <string name="builtin_pairing_failed">Pairing did not finish.</string>
+    <string name="builtin_manual_body">Only needed if Wireless debugging is unavailable. Run both lines with the phone plugged in, and re-run them after every reboot.</string>
 </resources>

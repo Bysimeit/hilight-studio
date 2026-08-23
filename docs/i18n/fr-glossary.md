@@ -76,8 +76,22 @@ translations:
 | Apps | Applis | "Applications" does not fit |
 | Setup | Config | "Configuration" does not fit |
 
-## Not covered
+## The Built-in access card
 
-The **Built-in access** card in Setup is the fork's own screen and its strings are still literals in
-`SetupScreen.kt`, so it shows in English whatever the phone's language. Extracting it is the
-remaining i18n work in this fork.
+Extracted from `SetupScreen.kt` into `builtin_*` and translated, so it now follows the phone's
+language like every other screen. Terms settled while doing it:
+
+| English | French | Note |
+|---|---|---|
+| built-in access | accès intégré | the card's own name |
+| debug daemon | démon de débogage | the thing that must keep running |
+| USB debugging | débogage USB | Android's own French, matching *débogage sans fil* |
+| pairing (the one-time step) | association | Android's French for the Wireless debugging dialog |
+| to pair | associer | never "appairer", which Android does not use here |
+| pairing code | code d'association | as the Settings dialog names it |
+| loopback address | adresse de bouclage | |
+| developer options | options développeur | Android's own French, no hyphen |
+
+The two sentences about keeping a debug switch on are the longest strings in the app. They are
+explanations, not labels, so they take full sentences and full stops; do not compress them into
+noun phrases.

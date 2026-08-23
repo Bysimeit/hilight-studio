@@ -4,6 +4,32 @@ All notable changes to HiLight Studio are documented here.
 
 ## [Unreleased]
 
+- The renderer now comes back by itself when Wireless debugging is switched back on. HiLight watches
+  the switch instead of waiting for the app to be opened, and clears its retry backoff when the
+  daemon returns, so the LEDs are back within a reconnect rather than within minutes.
+- Added **Start on its own after a reboot**, off by default, under Built-in access. With it on,
+  HiLight turns Wireless debugging on at boot just long enough to start a renderer and then turns it
+  back off, so a restart needs no trip through Developer options. It needs USB debugging on — with
+  no other transport, switching Wireless debugging back off would stop the daemon and kill the
+  renderer that was just started — and it restores the switch even when the attempt fails, so a
+  debug port is never left open behind it. This is what `WRITE_SECURE_SETTINGS` in the manifest is
+  for; it is granted by the renderer during setup and does nothing on a phone that never ran one.
+- Setup and the README now explain what actually has to stay on after setup, and it is not Wireless
+  debugging: it is the phone's debug daemon. The renderer is started by that daemon and Android
+  stops a daemon by killing everything it started, so **Wireless debugging can be switched off once
+  USB debugging is on** — a developer-options toggle, needing no cable and no computer, verified
+  with the cable unplugged. Turning both off is what takes the array with them. This is also the
+  quieter phone to leave behind, since Wireless debugging keeps a debug port listening on the local
+  network. Measured and written up in
+  [docs/TECHNICAL.md](docs/TECHNICAL.md#why-the-renderer-cannot-outlive-the-debug-daemon).
+- The copyable ADB commands and `scripts/start-helper.sh` now detach with `setsid` and `< /dev/null`,
+  matching what the app itself runs, so a renderer started from a computer survives the disconnect.
+- **Built-in access is translated.** It was the last screen whose strings were literals in the code,
+  so it showed in English whatever the phone's language; its 44 strings are now resources in English,
+  French and Japanese, including the connection-state pill. Both glossaries record the terms that
+  were settled — *association* rather than *appairage* for the pairing step, as Android's own French
+  names it, and ペア設定 to match the Wireless debugging screen.
+
 ## [1.1.0-experimental]
 
 - Added built-in setup: HiLight Studio now pairs with the phone's own Wireless debugging service

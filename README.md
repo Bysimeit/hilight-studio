@@ -72,13 +72,22 @@ Open the app, go to **Setup**, and follow the **Built-in access** card:
 1. **Allow local network access** when the app asks on first launch. Android 17 gates the phone's
    own debug service behind it; nothing leaves the device.
 2. **Turn on Developer options**: Settings, About phone, then tap **Build number** seven times.
-3. **Turn on Wireless debugging**, and stay connected to Wi-Fi.
+3. **Turn on Wireless debugging**, and stay connected to Wi-Fi. Afterwards it can be switched off
+   again, as long as USB debugging is on — see [If it does not connect](#if-it-does-not-connect).
 4. **Tap "Pair with this phone".** In Wireless debugging, choose **Pair device with pairing code**
    and leave that dialog open. A HiLight notification appears: pull down the shade over the dialog,
    type the six digits into it, and send.
 
 That is the whole setup. The pairing is remembered, and HiLight Studio brings its own renderer back
 after a reboot or an app update.
+
+**Then turn Wireless debugging back off, if you would rather not leave it on.** Switch **USB
+debugging** on first, in the same Developer options screen — it is only a toggle, no cable and no
+computer — and Wireless debugging can go off straight afterwards with the LEDs still running. What
+the renderer needs is the phone's debug daemon to keep running, and either switch does that; leaving
+the USB one on is the quieter choice, because Wireless debugging keeps a debug port listening on
+your local network and USB debugging with nothing plugged in exposes nothing. Turn Wireless
+debugging back on after a reboot so HiLight can start a fresh renderer, then off again.
 
 Then grant **Notification access** for notification rules and **Usage access** for foreground-app
 rules. Turn on **Live**, then choose a look in **Style**. A new installation starts with its
@@ -88,6 +97,15 @@ always-on style set to **Off**.
 
 - Wireless debugging must be on **and** the phone must be on a Wi-Fi network. The debug service is
   found over mDNS on that interface; with no network there is nothing to discover.
+- **Leave a debug transport enabled afterwards.** The renderer is started by the phone's debug
+  daemon, and Android stops a daemon by killing everything it started — so if the daemon stops, the
+  LEDs go with it. The daemon keeps running while *either* Wireless debugging or USB debugging is
+  on, so you can switch Wireless debugging off after setup as long as you turn **USB debugging** on
+  first. No cable or computer is needed for that, and it keeps a debug port off your network.
+  Turning both off stops the renderer; HiLight starts a fresh one by itself when Wireless debugging
+  comes back. The
+  [technical notes](docs/TECHNICAL.md#why-the-renderer-cannot-outlive-the-debug-daemon) explain why
+  no amount of detaching avoids this.
 - The pairing dialog must still be open when you send the code, and it expires after about a
   minute. Closing it takes the pairing endpoint down with it; just reopen it and send again.
 - If the Setup card says **needs local network**, grant that permission first. Without it the phone's
