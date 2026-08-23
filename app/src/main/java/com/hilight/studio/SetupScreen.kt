@@ -47,12 +47,16 @@ const val ADB_RESET =
     "adb shell \"pkill -f 'com.hilight.(core.AdbHelper|studio:hilight)'\""
 
 const val ADB_COMMAND = ADB_RESET + "\n" +
-    "adb shell 'CLASSPATH=${'$'}(pm path com.hilight.studio | head -1 | cut -d: -f2) " +
-        "nohup app_process / com.hilight.core.AdbHelper > /data/local/tmp/hilight.log 2>&1 &'"
+    "adb shell 'S=${'$'}(command -v setsid); " +
+        "CLASSPATH=${'$'}(pm path com.hilight.studio | head -1 | cut -d: -f2) " +
+        "nohup ${'$'}S app_process / com.hilight.core.AdbHelper " +
+        "> /data/local/tmp/hilight.log 2>&1 < /dev/null &'"
 
 const val ADB_COMMAND_CMD = ADB_RESET + "\n" +
-    "adb shell \"CLASSPATH=${'$'}(pm path com.hilight.studio | head -1 | cut -d: -f2) " +
-        "nohup app_process / com.hilight.core.AdbHelper > /data/local/tmp/hilight.log 2>&1 &\""
+    "adb shell \"S=${'$'}(command -v setsid); " +
+        "CLASSPATH=${'$'}(pm path com.hilight.studio | head -1 | cut -d: -f2) " +
+        "nohup ${'$'}S app_process / com.hilight.core.AdbHelper " +
+        "> /data/local/tmp/hilight.log 2>&1 < /dev/null &\""
 
 @Composable
 fun SetupScreen(store: Store) {
@@ -192,7 +196,7 @@ fun SetupScreen(store: Store) {
         label = "transportCards",
     ) { t ->
         Column {
-            if (t != Transport.SHIZUKU) AdbCard(ctx)
+            if (t != Transport.SHIZUKU) AdbCard(ctx, store)
             if (t != Transport.ADB) ShizukuCard(store, shizukuState)
         }
     }
@@ -406,7 +410,7 @@ private fun ShizukuCard(store: Store, state: ShizukuBackend.State) {
 }
 
 @Composable
-private fun AdbCard(ctx: Context) {
+private fun AdbCard(ctx: Context, store: Store) {
     val scope = rememberCoroutineScope()
     val state by AdbAccess.state.collectAsStateWithLifecycle()
     val detail by AdbAccess.detail.collectAsStateWithLifecycle()
@@ -419,8 +423,10 @@ private fun AdbCard(ctx: Context) {
 
     PixelCard {
         SectionTitle(
-            "Built-in access",
-            trailing = { LivePill(state.label, state == AdbAccessState.READY) },
+            stringResource(R.string.builtin_title),
+            trailing = {
+                LivePill(stringResource(state.labelRes), state == AdbAccessState.READY)
+            },
         )
 
         AnimatedContent(
@@ -431,99 +437,81 @@ private fun AdbCard(ctx: Context) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 when (s) {
                     AdbAccessState.LOCAL_NETWORK_OFF -> {
-                        Caption(
-                            "Android needs your permission for HiLight Studio to reach the phone's " +
-                                "own debug service on the local network. Nothing leaves the device.",
-                        )
+                        Caption(stringResource(R.string.builtin_local_network_body))
                         Button(onClick = { localNetwork.launch(AdbAccess.LOCAL_NETWORK_PERMISSION) }) {
-                            ButtonLabel("Allow local network")
+                            ButtonLabel(stringResource(R.string.builtin_allow_local_network))
                         }
                     }
 
                     AdbAccessState.DEVELOPER_OFF -> {
-                        Caption(
-                            "Turn on Developer options first: Settings, About phone, then tap " +
-                                "Build number seven times.",
-                        )
-                        Button(onClick = { openAboutPhone(ctx) }) { ButtonLabel("Open About phone") }
+                        Caption(stringResource(R.string.builtin_developer_body))
+                        Button(onClick = { openAboutPhone(ctx) }) {
+                            ButtonLabel(stringResource(R.string.builtin_open_about_phone))
+                        }
                     }
 
                     AdbAccessState.WIRELESS_OFF -> {
-                        Caption(
-                            "Turn on Wireless debugging and stay on Wi-Fi. HiLight talks to the " +
-                                "on-device debug service over the loopback address, so no computer " +
-                                "is involved.",
-                        )
+                        Caption(stringResource(R.string.builtin_wireless_body))
+                        Caption(stringResource(R.string.builtin_wireless_keep_on))
                         Button(onClick = { AdbAccess.openWirelessDebugging(ctx) }) {
-                            ButtonLabel("Open Wireless debugging")
+                            ButtonLabel(stringResource(R.string.builtin_open_wireless))
                         }
                     }
 
                     AdbAccessState.NEEDS_PAIRING -> {
-                        Caption(
-                            "One-time pairing. Tap below, then in Wireless debugging choose " +
-                                "\"Pair device with pairing code\" and leave that dialog open — a " +
-                                "HiLight notification will ask you for the six digits.",
-                        )
+                        Caption(stringResource(R.string.builtin_pairing_body))
                         if (notificationsEnabled(ctx)) {
                             Button(
                                 onClick = {
                                     AdbPairingService.start(ctx)
                                     AdbAccess.openWirelessDebugging(ctx)
                                 },
-                            ) { ButtonLabel("Pair with this phone") }
+                            ) { ButtonLabel(stringResource(R.string.builtin_pair)) }
                         } else {
-                            Caption(
-                                "Notifications from HiLight Studio are turned off, so the code " +
-                                    "prompt cannot appear. Turn them on to pair.",
-                            )
+                            Caption(stringResource(R.string.builtin_no_notifications_body))
                             Button(onClick = { openAppNotificationSettings(ctx) }) {
-                                ButtonLabel("Turn on notifications")
+                                ButtonLabel(stringResource(R.string.builtin_turn_on_notifications))
                             }
                         }
                         PairingProgress(phase, phaseDetail)
                     }
 
                     AdbAccessState.WORKING -> {
-                        Caption("Finding the debug service and starting the renderer.")
+                        Caption(stringResource(R.string.builtin_working_body))
                         PairingProgress(phase, phaseDetail)
                     }
 
                     AdbAccessState.READY -> {
-                        Caption(
-                            "The renderer is running in a shell-UID process. Pairing is remembered, " +
-                                "so this comes back on its own after a reboot.",
-                        )
+                        Caption(stringResource(R.string.builtin_ready_body))
+                        Caption(stringResource(R.string.builtin_ready_keep_on))
+                        AutoStartSetting(ctx, store)
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             FilledTonalButton(onClick = { scope.launch { AdbAccess.retry(ctx) } }) {
-                                ButtonLabel("Restart renderer")
+                                ButtonLabel(stringResource(R.string.builtin_restart_renderer))
                             }
                             TextButton(onClick = { AdbAccess.forget(ctx) }) {
-                                ButtonLabel("Forget pairing")
+                                ButtonLabel(stringResource(R.string.builtin_forget_pairing))
                             }
                         }
                     }
 
                     AdbAccessState.FAILED -> {
-                        Caption(detail ?: "Could not reach the on-device debug service.")
-                        Caption(
-                            "Wireless debugging must be on and the phone must be on a Wi-Fi " +
-                                "network for the service to be discoverable.",
-                        )
+                        Caption(detail ?: stringResource(R.string.builtin_failed_body))
+                        Caption(stringResource(R.string.builtin_failed_hint))
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Button(onClick = { scope.launch { AdbAccess.retry(ctx) } }) {
-                                ButtonLabel("Try again")
+                                ButtonLabel(stringResource(R.string.builtin_try_again))
                             }
                             TextButton(onClick = { AdbAccess.openWirelessDebugging(ctx) }) {
-                                ButtonLabel("Wireless debugging")
+                                ButtonLabel(stringResource(R.string.builtin_wireless_debugging))
                             }
                         }
                     }
 
                     else -> {
-                        Caption("Checking whether the renderer is reachable.")
+                        Caption(stringResource(R.string.builtin_unknown_body))
                         Button(onClick = { scope.launch { AdbAccess.retry(ctx) } }) {
-                            ButtonLabel("Connect")
+                            ButtonLabel(stringResource(R.string.builtin_connect))
                         }
                     }
                 }
@@ -531,32 +519,65 @@ private fun AdbCard(ctx: Context) {
         }
 
         TextButton(onClick = { manual = !manual }) {
-            ButtonLabel(if (manual) "Hide computer fallback" else "Use a computer instead")
+            ButtonLabel(
+                stringResource(
+                    if (manual) R.string.builtin_hide_manual else R.string.builtin_show_manual
+                )
+            )
         }
         if (manual) ManualCommands(ctx)
     }
 }
 
 @Composable
+private fun AutoStartSetting(ctx: Context, store: Store) {
+    val autoStart by store.autoStart.collectAsStateWithLifecycle()
+    var canWrite by remember { mutableStateOf(AdbAccess.canWriteSecureSettings(ctx)) }
+    var usbOn by remember { mutableStateOf(AdbAccess.usbDebuggingEnabled(ctx)) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            canWrite = AdbAccess.canWriteSecureSettings(ctx)
+            usbOn = AdbAccess.usbDebuggingEnabled(ctx)
+            delay(2000)
+        }
+    }
+
+    PixelToggleRow(
+        title = stringResource(R.string.builtin_autostart_title),
+        subtitle = stringResource(R.string.builtin_autostart_body),
+        checked = autoStart && canWrite && usbOn,
+        onChange = { store.setAutoStart(it) },
+    )
+    if (!canWrite) {
+        Caption(stringResource(R.string.builtin_autostart_needs_permission))
+    } else if (!usbOn) {
+        Caption(stringResource(R.string.builtin_autostart_needs_usb))
+        Button(onClick = { AdbAccess.openWirelessDebugging(ctx) }) {
+            ButtonLabel(stringResource(R.string.builtin_open_developer_options))
+        }
+    }
+}
+
+@Composable
 private fun PairingProgress(phase: PairingPhase, detail: String?) {
     if (phase == PairingPhase.OFF) return
-    val text = detail ?: when (phase) {
-        PairingPhase.SEARCHING -> "Waiting for the pairing dialog to appear."
-        PairingPhase.WAITING_FOR_CODE -> "Enter the six digits in the HiLight notification."
-        PairingPhase.PAIRING -> "Pairing and starting the renderer."
-        PairingPhase.DONE -> "Paired."
-        PairingPhase.FAILED -> "Pairing did not finish."
-        PairingPhase.OFF -> return
-    }
+    val text = detail ?: stringResource(
+        when (phase) {
+            PairingPhase.SEARCHING -> R.string.builtin_pairing_searching
+            PairingPhase.WAITING_FOR_CODE -> R.string.builtin_pairing_waiting_code
+            PairingPhase.PAIRING -> R.string.builtin_pairing_pairing
+            PairingPhase.DONE -> R.string.builtin_pairing_done
+            PairingPhase.FAILED -> R.string.builtin_pairing_failed
+            PairingPhase.OFF -> return
+        }
+    )
     Caption(text)
 }
 
 @Composable
 private fun ManualCommands(ctx: Context) {
-    Caption(
-        "Only needed if Wireless debugging is unavailable. Run both lines with the phone plugged " +
-            "in, and re-run them after every reboot.",
-    )
+    Caption(stringResource(R.string.builtin_manual_body))
     Text(
         ADB_COMMAND,
         style = MaterialTheme.typography.bodySmall,
@@ -571,12 +592,16 @@ private fun ManualCommands(ctx: Context) {
             .padding(14.dp),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Button(onClick = { copy(ctx, ADB_COMMAND, R.string.adb_copied) }) { ButtonLabel("Copy") }
+        Button(onClick = { copy(ctx, ADB_COMMAND, R.string.adb_copied) }) {
+            ButtonLabel(stringResource(R.string.adb_copy))
+        }
         TextButton(onClick = { copy(ctx, ADB_COMMAND_CMD, R.string.adb_copied_cmd) }) {
-            ButtonLabel("Copy for cmd.exe")
+            ButtonLabel(stringResource(R.string.adb_copy_cmd))
         }
     }
-    TextButton(onClick = { share(ctx, ADB_COMMAND) }) { ButtonLabel("Send to computer") }
+    TextButton(onClick = { share(ctx, ADB_COMMAND) }) {
+        ButtonLabel(stringResource(R.string.adb_send))
+    }
 }
 
 private fun openAboutPhone(ctx: Context) {

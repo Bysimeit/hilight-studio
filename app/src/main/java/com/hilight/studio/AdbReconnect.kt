@@ -56,16 +56,25 @@ class AdbReconnectService : Service() {
 
     private suspend fun run() {
         Bridge.ensureFiles(this)
-        val deadline = SystemClock.elapsedRealtime() + WINDOW_MS
-        var wait = FIRST_GAP_MS
-        while (SystemClock.elapsedRealtime() < deadline) {
-            if (!AdbAccess.paired(this)) break
-            if (AdbAccess.wirelessDebuggingEnabled(this) && AdbAccess.connect(this)) break
-            delay(wait)
-            wait = (wait * 2).coerceAtMost(MAX_GAP_MS)
+        if (Store.get(this).autoStartEnabled()) {
+            AdbAccess.withWirelessDebugging(this) { attempts() }
+        } else {
+            attempts()
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
+    }
+
+    private suspend fun attempts(): Boolean {
+        val deadline = SystemClock.elapsedRealtime() + WINDOW_MS
+        var wait = FIRST_GAP_MS
+        while (SystemClock.elapsedRealtime() < deadline) {
+            if (!AdbAccess.paired(this)) return false
+            if (AdbAccess.wirelessDebuggingEnabled(this) && AdbAccess.connect(this)) return true
+            delay(wait)
+            wait = (wait * 2).coerceAtMost(MAX_GAP_MS)
+        }
+        return false
     }
 
     private fun notification(): Notification {

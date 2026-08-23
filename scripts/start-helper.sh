@@ -8,8 +8,9 @@ APK="$($ADB shell pm path $PKG | head -1 | tr -d '\r' | cut -d: -f2)"
 [ -n "$APK" ] || { echo "$PKG is not installed — run ./gradlew :app:installDebug first"; exit 1; }
 
 $ADB shell "pkill -f com.hilight.core.AdbHelper" >/dev/null 2>&1 || true
-$ADB shell "nohup sh -c 'CLASSPATH=$APK exec app_process / com.hilight.core.AdbHelper' \
-  >/data/local/tmp/hilight.log 2>&1 &"
+$ADB shell "S=\$(command -v setsid); \
+  nohup \$S sh -c 'CLASSPATH=$APK exec app_process / com.hilight.core.AdbHelper' \
+  >/data/local/tmp/hilight.log 2>&1 </dev/null &"
 
 sleep 2
 $ADB shell "tail -3 /data/local/tmp/hilight.log" || true

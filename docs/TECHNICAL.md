@@ -143,6 +143,100 @@ the lamp.
   helper picks the array up, with no overlap between sessions
 - Shizuku 13.6.0 (official release, signer `CN=Rikka`) used for all of the above
 
+### Why the renderer cannot outlive the debug daemon
+
+The renderer is detached as thoroughly as a shell-UID process can be: `setsid` for its own session,
+`nohup`, `< /dev/null`, and both output streams redirected to a file. Measured on a Pixel 11 Pro
+(Android 17, API 37) after starting it the way the app does:
+
+```
+renderer  pid=32371  ppid=1  pgid=32371  sid=32371
+```
+
+Reparented to init, its own session, its own process group. Nothing about the shell that started it
+can reach it any more. And yet:
+
+```
+renderer  0::/system/uid_0/pid_31692
+adbd      0::/system/uid_0/pid_31692     ← 31692 is adbd
+```
+
+It is inside **adbd's cgroup**, and its pid is listed in that cgroup's `cgroup.procs`. Android's init
+does not stop a service by signalling one pid; it calls `killProcessGroup()`, which SIGKILLs every
+process the cgroup lists. Sessions and process groups are not consulted, and SIGKILL cannot be
+ignored. So when the last debug transport goes away and init stops adbd, the renderer goes with it.
+
+There is no way out of that cgroup from uid 2000 on a locked retail device. Every candidate was
+tried on the device and refused:
+
+| Attempt | Result |
+|---|---|
+| `echo $$ > /sys/fs/cgroup/cgroup.procs` | `Permission denied` — the file is `system:system 0775`, and shell is not in `system` |
+| `/sys/fs/cgroup/uid_2000/` | does not exist |
+| `mkdir /sys/fs/cgroup/hilight` | `Permission denied` |
+| `setprop ctl.restart adbd` | refused for shell |
+
+So what the renderer actually depends on is **adbd staying alive** — not on Wireless debugging in
+particular. adbd runs while any debug transport is enabled, and it does not care which:
+
+| Wireless debugging | USB debugging | Cable | adbd | Renderer |
+|---|---|---|---|---|
+| on | either | either | running | alive |
+| off | **on** | plugged | running — pid unchanged across the toggle | alive |
+| off | **on** | **unplugged** | running | **alive** |
+| off | off | either | stopped by init | killed with the cgroup |
+
+The last row is the reported symptom; the two middle rows are the way out of it. **Wireless debugging
+can be switched off after setup, as long as USB debugging is enabled** — and USB debugging is a
+developer-options toggle, so this needs no cable and no computer. All four rows were measured on a
+Pixel 11 Pro running Android 17, including the unplug: the renderer kept driving the array with the
+cable out and was still on the same pid when it came back.
+
+What stops adbd is the setting going off, not the cable coming out. Confirmed from the other side as
+well: after both switches were turned off and USB debugging turned back on, adbd returned on a
+different pid (31692 → 10839) — the restart that kills the renderer.
+
+That end state is also the better one to leave a phone in. Wireless debugging keeps a TLS debug port
+listening on the local network; USB debugging with nothing plugged in exposes nothing. Wireless
+debugging is still what *starts* a renderer, because it is the only transport the app can reach on
+its own, so it is turned back on after a reboot and can go off again once the array is running.
+
+Two consequences worth writing down, because both look like bugs from outside:
+
+- **A persistent app ↔ renderer channel would not change this.** The ADB transport already survives
+  adbd perfectly well — it is two JSON files on shared storage, and nothing about it touches the
+  daemon once the renderer is up. Replacing it with a binder handoff would make the channel faster
+  and give the app instant death detection, but the renderer would still be killed at exactly the
+  same moment, because what kills it is the cgroup, not the channel.
+- **Auto-enabling Wireless debugging at boot cannot then turn it back off.** Granting the app
+  `WRITE_SECURE_SETTINGS` and flipping `adb_wifi_enabled` on at `BOOT_COMPLETED` would start a
+  renderer, but setting it back to 0 afterwards stops the daemon again and kills the renderer that
+  was just started. The switch has to stay on for as long as the array is wanted.
+
+What is done instead is to make the loss self-healing, in two places:
+
+- `AdbAccess.watchWirelessDebugging` observes `adb_wifi_enabled` and starts a fresh renderer the
+  moment the switch comes back on, without waiting for the user to open the app.
+- **Start on its own after a reboot**, an opt-in in Setup that is off by default. With it on,
+  `AdbReconnectService` turns Wireless debugging on itself at `BOOT_COMPLETED`, starts a renderer,
+  and turns it back off — a few seconds instead of a manual trip through Developer options.
+
+The second needs `WRITE_SECURE_SETTINGS`, which is `signature|privileged|development|installer|role`
+— the `development` flag is what makes `pm grant` legal, unlike `CONTROL_DEVICE_LIGHTS`
+(`signature|privileged`, `flags=0x0`), which `pm grant` refuses as "not a changeable permission
+type". The start command already runs as shell, so it grants the permission itself on every renderer
+start; declaring it in the manifest grants nothing on its own, so on a phone that never completed
+setup it stays inert.
+
+Two guards, both of which come straight from the measurements above:
+
+- The auto-start only runs when **USB debugging is on**. Without it, turning Wireless debugging back
+  off at the end would stop the daemon and kill the renderer that had just been started — the step
+  would undo itself.
+- Restoring the switch is in a `finally`, so a failed or timed-out attempt still puts
+  `adb_wifi_enabled` back to 0 rather than leaving a debug port open. The one deliberate exception is
+  USB debugging disappearing mid-attempt, where leaving it on is the lesser evil; that is logged.
+
 ## LED safety implementation
 
 The safety guards summarised in the README live in `Engine`, not in the UI, so no state document can
@@ -224,8 +318,9 @@ or shared without ever including message text.
 - Privileged access has to be re-established after every reboot. Built-in access does this itself
   from a `BOOT_COMPLETED` receiver, retrying over a three-minute window because Wi-Fi and the debug
   daemon are usually not up yet at boot; the Shizuku and manual ADB routes still need the user.
-  Wireless debugging must stay enabled either way. Removing that requirement entirely would need
-  root or an unlocked bootloader (app in `/system/priv-app`).
+  A debug transport has to stay enabled either way — Wireless *or* USB debugging, since what the
+  renderer depends on is adbd continuing to run; see below. Removing that requirement entirely would
+  need root or an unlocked bootloader (app in `/system/priv-app`).
 - Built-in access needs the phone to be on a Wi-Fi network: the debug daemon advertises itself over
   mDNS on that interface, and there is nothing to discover without it.
 - If Shizuku is (re)started while HiLight Studio is already running, reopen the app so Shizuku can hand

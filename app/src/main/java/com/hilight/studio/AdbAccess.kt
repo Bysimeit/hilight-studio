@@ -3,10 +3,14 @@ package com.hilight.studio
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.ContentObserver
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.StringRes
 import io.github.muntashirakon.adb.AbsAdbConnectionManager
 import io.github.muntashirakon.adb.AdbPairingRequiredException
 import io.github.muntashirakon.adb.android.AdbMdns
@@ -52,15 +56,15 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
-enum class AdbAccessState(val label: String) {
-    UNKNOWN("checking"),
-    LOCAL_NETWORK_OFF("needs local network"),
-    DEVELOPER_OFF("developer options off"),
-    WIRELESS_OFF("wireless debugging off"),
-    NEEDS_PAIRING("not paired"),
-    WORKING("connecting"),
-    READY("connected"),
-    FAILED("failed"),
+enum class AdbAccessState(@StringRes val labelRes: Int) {
+    UNKNOWN(R.string.builtin_state_unknown),
+    LOCAL_NETWORK_OFF(R.string.builtin_state_local_network),
+    DEVELOPER_OFF(R.string.builtin_state_developer_off),
+    WIRELESS_OFF(R.string.builtin_state_wireless_off),
+    NEEDS_PAIRING(R.string.builtin_state_not_paired),
+    WORKING(R.string.builtin_state_connecting),
+    READY(R.string.builtin_state_connected),
+    FAILED(R.string.builtin_state_failed),
 }
 
 data class PairingTarget(val host: String, val port: Int)
@@ -77,6 +81,8 @@ object AdbAccess {
     private const val RETRY_BASE_MS = 30_000L
     private const val RETRY_CEILING_MS = 900_000L
 
+    const val SECURE_SETTINGS_PERMISSION = "android.permission.WRITE_SECURE_SETTINGS"
+
     private const val HELPER_LOG_COMMAND = "tail -5 /data/local/tmp/hilight.log"
 
     private const val START_COMMAND =
@@ -88,7 +94,8 @@ object AdbAccess {
             "CLASSPATH=${'$'}CP nohup ${'$'}S app_process / \"${'$'}{K}Helper\" " +
             "> /data/local/tmp/hilight.log 2>&1 < /dev/null & " +
             "P=${'$'}!; sleep 2; " +
-            "kill -0 ${'$'}P 2>/dev/null && echo detached || echo \"renderer exited early\""
+            "kill -0 ${'$'}P 2>/dev/null && echo detached || echo \"renderer exited early\"; " +
+            "pm grant com.hilight.studio ${SECURE_SETTINGS_PERMISSION} 2>/dev/null"
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val gate = Mutex()
@@ -108,7 +115,41 @@ object AdbAccess {
     @Volatile
     private var failures = 0
 
+    @Volatile
+    private var wirelessWatch: ContentObserver? = null
+
     const val LOCAL_NETWORK_PERMISSION = "android.permission.ACCESS_LOCAL_NETWORK"
+
+    fun watchWirelessDebugging(ctx: Context) {
+        if (wirelessWatch != null) return
+        val app = ctx.applicationContext
+        synchronized(this) {
+            if (wirelessWatch != null) return
+            val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+                override fun onChange(selfChange: Boolean) = onWirelessDebuggingChanged(app)
+            }
+            val registered = runCatching {
+                app.contentResolver.registerContentObserver(
+                    Settings.Global.getUriFor("adb_wifi_enabled"), true, observer
+                )
+            }.onFailure { Log.w(TAG, "could not watch the wireless debugging switch", it) }
+            if (registered.isSuccess) wirelessWatch = observer
+        }
+    }
+
+    private fun onWirelessDebuggingChanged(app: Context) {
+        val on = wirelessDebuggingEnabled(app)
+        val alive = Bridge.readStatus(app).alive
+        val paired = paired(app)
+        Log.i(TAG, "wireless debugging now $on (paired=$paired, renderer alive=$alive)")
+        if (!on) {
+            refresh(app)
+            return
+        }
+        failures = 0
+        lastAttemptAt = 0
+        if (paired && !alive) ensure(app)
+    }
 
     fun localNetworkGranted(ctx: Context): Boolean =
         ctx.checkSelfPermission(LOCAL_NETWORK_PERMISSION) == PackageManager.PERMISSION_GRANTED
@@ -122,6 +163,40 @@ object AdbAccess {
     fun wirelessDebuggingEnabled(ctx: Context): Boolean = runCatching {
         Settings.Global.getInt(ctx.contentResolver, "adb_wifi_enabled", 0) == 1
     }.getOrDefault(false)
+
+    fun usbDebuggingEnabled(ctx: Context): Boolean = runCatching {
+        Settings.Global.getInt(ctx.contentResolver, Settings.Global.ADB_ENABLED, 0) == 1
+    }.getOrDefault(false)
+
+    fun canWriteSecureSettings(ctx: Context): Boolean =
+        ctx.checkSelfPermission(SECURE_SETTINGS_PERMISSION) == PackageManager.PERMISSION_GRANTED
+
+    fun autoStartPossible(ctx: Context): Boolean {
+        val app = ctx.applicationContext
+        return canWriteSecureSettings(app) && usbDebuggingEnabled(app)
+    }
+
+    private fun setWirelessDebugging(ctx: Context, on: Boolean): Boolean = runCatching {
+        Settings.Global.putInt(ctx.contentResolver, "adb_wifi_enabled", if (on) 1 else 0)
+    }.onFailure { Log.w(TAG, "could not set adb_wifi_enabled=$on", it) }.isSuccess
+
+    suspend fun withWirelessDebugging(ctx: Context, body: suspend () -> Boolean): Boolean {
+        val app = ctx.applicationContext
+        if (wirelessDebuggingEnabled(app)) return body()
+        if (!autoStartPossible(app)) return body()
+        if (!setWirelessDebugging(app, true)) return body()
+        Log.i(TAG, "turned wireless debugging on to reach the daemon")
+        return try {
+            body()
+        } finally {
+            if (usbDebuggingEnabled(app)) {
+                setWirelessDebugging(app, false)
+                Log.i(TAG, "turned wireless debugging back off")
+            } else {
+                Log.w(TAG, "usb debugging went away; leaving wireless debugging on")
+            }
+        }
+    }
 
     fun paired(ctx: Context): Boolean =
         prefs(ctx).getBoolean(KEY_PAIRED, false) && keyFile(ctx).exists()
