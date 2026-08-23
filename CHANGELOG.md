@@ -43,6 +43,25 @@ All notable changes to HiLight Studio are documented here.
   the phone's own debug daemon, and `RECEIVE_BOOT_COMPLETED` for the automatic reconnect. Android 17
   requires the local-network permission at runtime and asks for it on first launch.
 - Shizuku and the two-command ADB flow are still available as alternatives.
+## [1.0.6-experimental] - 2026-08-23
+
+- Added a manual **Check for updates** action under Setup. It includes experimental GitHub
+  prereleases, reports whether the installed version is current, and opens the matching release page
+  when an update is available. It never checks in the background.
+- Added **privacy activity rules** for microphone and camera use. A rule can cover any app or one
+  selected app, stops immediately when the activity ends, and defaults to 10 seconds lit followed by
+  a 10-second cooldown for at most one minute per continuous use. The animation, colours, timing,
+  speed, and brightness are all configurable.
+- Added **automatic root support**. Rooted phones use a root-owned renderer after the root manager's
+  one-time approval, with no Shizuku or ADB setup. Failed or denied root access falls back cleanly to
+  the existing setup choices.
+- Made renderer handoff fail closed: the next root, Shizuku, or ADB renderer cannot drive the array
+  until the previous one has acknowledged an idle state or stopped.
+- Enabled R8 code shrinking and optimized resource shrinking for release builds. Removed the duplicate
+  full-size launcher bitmap and stored the in-app copy as a smaller lossless WebP, cutting the local
+  release artifact from about 45 MB to about 2.7 MB.
+- Added release checks that build the standalone helper and prove R8 kept the ADB and Shizuku entry
+  points.
 
 ## [1.0.5-experimental] - 2026-08-22
 

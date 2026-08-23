@@ -181,4 +181,31 @@
     <string name="rules_off_title">HiLight is off</string>
     <string name="rules_off_pill">off</string>
     <string name="rules_off_body">Rules only run while HiLight is on. Turn it on from the Live tab.</string>
+    <!-- Privacy activity rules -->
+    <string name="privacy_section_title">Privacy activity</string>
+    <string name="privacy_intro">Use HiLight while Android reports that the microphone or camera is active.</string>
+    <string name="privacy_default_summary">Default: light for 10 seconds, rest for 10 seconds, and stop after 1 minute or sooner when use ends. You can change the animation, colour and timing.</string>
+    <string name="privacy_add">Add privacy activity</string>
+    <string name="privacy_add_for_app">Add privacy activity for this app</string>
+    <string name="privacy_choose_activity">Choose an activity</string>
+    <string name="privacy_microphone">Microphone</string>
+    <string name="privacy_camera">Camera</string>
+    <string name="privacy_microphone_active">Microphone active</string>
+    <string name="privacy_camera_active">Camera active</string>
+    <string name="privacy_microphone_hint">Signals while an app is recording audio.</string>
+    <string name="privacy_camera_hint">Signals while an app is using the camera.</string>
+    <string name="privacy_card_summary">%1$s light · %2$s rest</string>
+    <string name="privacy_observation_note">HiLight observes Android’s active privacy signal in the privileged renderer. It does not read recordings.</string>
+    <string name="privacy_light_time">Light time</string>
+    <string name="privacy_allow_long_light">Allow more than 30 seconds</string>
+    <string name="privacy_long_warn_first_title">Light longer than 30 seconds?</string>
+    <string name="privacy_long_warn_first_body">The array will stay active for most of the one-minute privacy window. A shorter light period with a proper rest is safer.</string>
+    <string name="privacy_long_warn_second_title">Use the extended light time?</string>
+    <string name="privacy_long_warn_second_body">Long continuous use has not been tested on this hardware. The one-minute episode limit still applies.</string>
+    <string name="privacy_cooldown">Rest time</string>
+    <string name="privacy_cooldown_recommendation">A 10 to 20 second rest is recommended.</string>
+    <string name="privacy_cooldown_short_warning">Less than 10 seconds gives the array very little rest. A 10 to 20 second rest is recommended.</string>
+    <string name="privacy_one_minute_cap">Stops immediately when use ends. One uninterrupted use can signal for at most 1 minute.</string>
+    <string name="privacy_replace_warning">Saving will replace the existing rule for this activity and app.</string>
+
 </resources>

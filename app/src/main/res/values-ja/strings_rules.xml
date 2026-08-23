@@ -284,4 +284,31 @@
     <string name="rules_off_title">HiLight がオフです</string>
     <string name="rules_off_pill">オフ</string>
     <string name="rules_off_body">ルールは HiLight がオンの間だけ動きます。ライブタブからオンにしてください。</string>
+    <!-- プライバシー アクティビティ ルール -->
+    <string name="privacy_section_title">プライバシー アクティビティ</string>
+    <string name="privacy_intro">Android がマイクまたはカメラの使用中を示している間、HiLight を動作させます。</string>
+    <string name="privacy_default_summary">初期設定では 10 秒点灯、10 秒休止を繰り返し、使用が終了した時点または最大 1 分で停止します。アニメーション、色、時間は変更できます。</string>
+    <string name="privacy_add">プライバシー アクティビティを追加</string>
+    <string name="privacy_add_for_app">このアプリのプライバシー アクティビティを追加</string>
+    <string name="privacy_choose_activity">アクティビティを選択</string>
+    <string name="privacy_microphone">マイク</string>
+    <string name="privacy_camera">カメラ</string>
+    <string name="privacy_microphone_active">マイク使用中</string>
+    <string name="privacy_camera_active">カメラ使用中</string>
+    <string name="privacy_microphone_hint">アプリが音声を録音している間に通知します。</string>
+    <string name="privacy_camera_hint">アプリがカメラを使用している間に通知します。</string>
+    <string name="privacy_card_summary">%1$s点灯 · %2$s休止</string>
+    <string name="privacy_observation_note">HiLight は権限付きレンダラーで Android の使用中シグナルを監視します。録音や映像の内容は読み取りません。</string>
+    <string name="privacy_light_time">点灯時間</string>
+    <string name="privacy_allow_long_light">30 秒を超える点灯を許可</string>
+    <string name="privacy_long_warn_first_title">30 秒より長く点灯しますか</string>
+    <string name="privacy_long_warn_first_body">1 分間の通知時間の大部分で LED アレイが動作します。短い点灯時間と十分な休止時間を推奨します。</string>
+    <string name="privacy_long_warn_second_title">長い点灯時間を使用しますか</string>
+    <string name="privacy_long_warn_second_body">このハードウェアでの長時間の連続使用は検証されていません。最大 1 分の制限は引き続き適用されます。</string>
+    <string name="privacy_cooldown">休止時間</string>
+    <string name="privacy_cooldown_recommendation">10〜20 秒の休止を推奨します。</string>
+    <string name="privacy_cooldown_short_warning">10 秒未満では LED アレイの休止が短すぎます。10〜20 秒を推奨します。</string>
+    <string name="privacy_one_minute_cap">使用が終了するとすぐに停止します。連続した 1 回の使用で通知する時間は最大 1 分です。</string>
+    <string name="privacy_replace_warning">保存すると、このアクティビティとアプリの既存のルールが置き換えられます。</string>
+
 </resources>

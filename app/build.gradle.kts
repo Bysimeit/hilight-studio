@@ -22,7 +22,7 @@ android {
 
         minSdk = 37
         targetSdk = 37
-        versionCode = 6
+        versionCode = 8
         versionName = "1.1.0"
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
     }
@@ -41,7 +41,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            optimization {
+                enable = true
+            }
 
             signingConfig = signingConfigs.getByName("release").takeIf { it.storeFile != null }
         }
@@ -78,4 +80,7 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk15to18:1.81")
     implementation("org.conscrypt:conscrypt-android:2.5.3")
     testImplementation("junit:junit:4.13.2")
+    // Android's org.json methods are framework stubs in local JVM tests; this supplies the real
+    // implementation for preference/state round-trip tests and is not packaged in the APK.
+    testImplementation("org.json:json:20240303")
 }

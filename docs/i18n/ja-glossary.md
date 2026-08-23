@@ -66,6 +66,7 @@ the same English term must not appear as two different Japanese words on two scr
 | stable chat id | 固定のチャット ID | |
 | test | テスト | |
 | forget | 削除 | 忘れる reads oddly for data |
+| update | アップデート | familiar Android Settings term |
 
 ## The Built-in access card
 

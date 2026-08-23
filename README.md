@@ -23,12 +23,16 @@ Control the eight-LED HiLight array on Pixel 11 Pro devices.
 
 - Solid colours and animated patterns across all eight LEDs
 - Per-app rules for foreground use and notifications
+- Customisable microphone and camera activity rules, with any built-in animation and colour, for any
+  app or one selected app
 - Per-contact rules: a colour for one person or one chat, picked from the chats HiLight has seen
 - Saved presets with import and export
 - Wallpaper-derived colours and a Quick Settings tile
 - Quiet hours, Do Not Disturb, Battery Saver, and low-battery controls
 - Call rules: one look while the phone rings, another once the call connects
 - Set up entirely on the phone: no computer, no companion app, no root
+- Automatic root access when available, with Shizuku and ADB as fallbacks
+- Manual update checks against the project's GitHub releases
 - English, French and Japanese, selectable per app from Android's own language settings
 
 ## Screenshots
@@ -63,9 +67,17 @@ adb install -r HiLight-Studio-v1.1.0-experimental-signed.apk
 ## Set up
 
 Driving the LEDs needs `android.permission.CONTROL_DEVICE_LIGHTS`, which Android declares
-`signature|privileged`. No installed app can hold it, so the renderer has to run in a process owned
-by the shell UID. HiLight Studio arranges that on the phone itself, with no computer, no companion
-app, and no root.
+`signature|privileged`. No installed app can hold it, so the renderer has to run in a privileged
+process. On a rooted phone that is uid 0; otherwise it is the shell UID, which HiLight Studio
+arranges on the phone itself, with no computer, no companion app, and no root.
+
+### Root
+
+If the phone is rooted, open HiLight Studio and turn it on. The app detects root automatically and
+uses it instead of Shizuku or ADB. Approve the one-time request from your root manager when it
+appears; no other setup is needed. The rest of this section is for phones without root.
+
+### Built-in access
 
 Open the app, go to **Setup**, and follow the **Built-in access** card:
 
@@ -150,6 +162,8 @@ The renderer enforces these limits even if app state is edited:
 
 - Ambient effects stop after 30 seconds by default and can be raised to 5 minutes.
 - Notification effects are limited to 1 minute.
+- Privacy activity rules run only while the microphone or camera remains active. Their default rhythm
+  is 10 seconds on, 10 seconds off, with a 1-minute maximum per continuous use.
 - Sustained brightness tapers after 10 seconds of continuous light.
 - The array can be active for at most half of any 10-minute window.
 - Battery Saver, low-battery, quiet-hours, screen-state, and Do Not Disturb rules can pause output.
@@ -160,9 +174,14 @@ See [Technical details](docs/TECHNICAL.md) for the renderer architecture, hardwa
 
 ## Privacy
 
-HiLight Studio has no analytics, account system, or telemetry. App rules and presets stay on the device. Notification and usage access are optional and are used locally for the rules you enable.
+HiLight Studio has no analytics, account system, or telemetry. It uses the internet only when you
+tap **Check for updates** under Setup, which fetches public release information from GitHub. No app
+rules, notification data, or settings are sent. App rules and presets stay on the device.
+Notification and usage access are optional and are used locally for the rules you enable. Privacy
+activity rules observe only whether Android reports the microphone or camera as active; HiLight never
+reads or records audio, video, or their contents.
 
-The app declares `android.permission.INTERNET` and `android.permission.ACCESS_LOCAL_NETWORK` because Android gates sockets and local service discovery behind them, including the connection HiLight Studio makes to the phone's own debug daemon during setup. Nothing in the project contacts a remote host.
+The app declares `android.permission.INTERNET` and `android.permission.ACCESS_LOCAL_NETWORK` because Android gates sockets and local service discovery behind them, including the connection HiLight Studio makes to the phone's own debug daemon during setup, and the update check above. Nothing else in the project contacts a remote host.
 
 Per-contact rules read the sender's name from the notification itself, so they need no contacts permission — picking a contact by hand uses the system picker, which hands over only the row you tap. HiLight remembers the names of chats it has seen so the picker needs no typing; that list is stored on the device, is capped, and can be cleared at any time with **Forget remembered chats** under Setup. Message text is never stored, never logged, and never included in anything the notification inspector copies or shares.
 

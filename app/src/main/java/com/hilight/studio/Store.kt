@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +18,7 @@ class Store private constructor(private val app: Context) {
 
     private val adb = AdbBackend(app)
     val shizuku = ShizukuBackend(app)
+    val root = RootBackend(app)
 
     private val _transport = MutableStateFlow(
         runCatching { Transport.valueOf(prefs.getString("transport", null) ?: "AUTO") }
@@ -83,6 +85,9 @@ class Store private constructor(private val app: Context) {
     private val _rules = MutableStateFlow(loadRules())
     val rules: StateFlow<List<AppRule>> = _rules.asStateFlow()
 
+    private val _privacyRules = MutableStateFlow(loadPrivacyRules())
+    val privacyRules: StateFlow<List<PrivacyRule>> = _privacyRules.asStateFlow()
+
     /**
      * Chats the listener has seen, newest first, across all apps.
      *
@@ -143,6 +148,14 @@ class Store private constructor(private val app: Context) {
 
     private var activeAlert: JSONObject? = null
     private var alertExpiry: Runnable? = null
+    private var stateRevision = SystemClock.elapsedRealtime()
+    private var rootTransition = false
+    private var drivingTransport: Transport? = null
+    private var handoffTarget: Transport? = null
+    private var handoffGeneration = 0L
+    private var pendingHandoff: PendingOutput? = null
+
+    private data class PendingOutput(val enabled: Boolean, val alert: JSONObject?, val arm: Boolean)
 
     init {
         Bridge.ensureFiles(app)
@@ -187,6 +200,22 @@ class Store private constructor(private val app: Context) {
                 HiLightTile.refresh(app)
             }
         }
+        root.onStateChanged = {
+            main.post {
+                when (root.state.value) {
+                    RootBackend.State.AVAILABLE -> if (_enabled.value) beginRootStart()
+                    RootBackend.State.RUNNING,
+                    RootBackend.State.UNAVAILABLE,
+                    RootBackend.State.DENIED,
+                    RootBackend.State.ERROR -> pushCurrent(arm = false)
+                    RootBackend.State.CHECKING,
+                    RootBackend.State.REQUESTING,
+                    RootBackend.State.STARTING -> Unit
+                }
+                HiLightTile.refresh(app)
+            }
+        }
+        if (_enabled.value && root.state.value == RootBackend.State.AVAILABLE) beginRootStart()
 
         main.post { syncWatcher() }
     }
@@ -196,11 +225,15 @@ class Store private constructor(private val app: Context) {
         RuleWatcher.syncRunning(app, _rules.value, _enabled.value)
     }
 
-    private fun backend(): Backend = when (_transport.value) {
-        Transport.SHIZUKU -> shizuku
-        Transport.ADB -> adb
-        Transport.AUTO ->
-            if (shizuku.state.value == ShizukuBackend.State.CONNECTED) shizuku else adb
+    private fun backend(): Backend {
+        if (root.state.value == RootBackend.State.RUNNING) return root
+        return when (_transport.value) {
+            Transport.SHIZUKU -> shizuku
+            Transport.ADB -> adb
+            Transport.ROOT -> root
+            Transport.AUTO ->
+                if (shizuku.state.value == ShizukuBackend.State.CONNECTED) shizuku else adb
+        }
     }
 
     fun setTransport(t: Transport) {
@@ -210,10 +243,15 @@ class Store private constructor(private val app: Context) {
         pushCurrent()
     }
 
+    fun retryRoot() {
+        root.refreshPresence()
+    }
+
     fun setEnabled(v: Boolean) {
         _enabled.value = v
         prefs.edit().putBoolean("enabled", v).apply()
-        pushCurrent()
+        if (v && root.state.value == RootBackend.State.AVAILABLE) beginRootStart()
+        else pushCurrent()
         HiLightTile.refresh(app)
         syncWatcher()
     }
@@ -366,6 +404,21 @@ class Store private constructor(private val app: Context) {
         syncWatcher()
     }
 
+    fun upsertPrivacyRule(rule: PrivacyRule, replacing: PrivacyRule? = null) {
+        val stale = setOfNotNull(replacing?.id, rule.id)
+        val out = _privacyRules.value.filterNot { it.id in stale }.toMutableList()
+        out += rule
+        _privacyRules.value = out
+        savePrivacyRules()
+        pushCurrent(arm = false)
+    }
+
+    fun removePrivacyRule(rule: PrivacyRule) {
+        _privacyRules.value = _privacyRules.value.filterNot { it.id == rule.id }
+        savePrivacyRules()
+        pushCurrent(arm = false)
+    }
+
     fun savePreset(name: String) {
         // The caller supplies the fallback name: it is user-visible text, and only a composable can
         // resolve it from resources. An empty name arriving here would be a bug in that caller.
@@ -433,6 +486,7 @@ class Store private constructor(private val app: Context) {
             durationMs = rule.durationMs,
             speedMs = rule.speedMs,
             brightness = rule.brightness,
+            source = AlertSource.CALL,
         )
         pushCurrent(arm = false)
     }
@@ -767,6 +821,7 @@ class Store private constructor(private val app: Context) {
                 durationMs = rule.durationMs,
                 speedMs = rule.speedMs,
                 brightness = rule.brightness,
+                source = AlertSource.NOTIFICATION,
             ),
             durationMs = rule.durationMs,
             arm = false,
@@ -819,6 +874,7 @@ class Store private constructor(private val app: Context) {
             durationMs = 0,
             speedMs = rule.speedMs,
             brightness = rule.brightness,
+            source = AlertSource.FOREGROUND,
         )
         pushCurrent(arm = false)
     }
@@ -832,6 +888,7 @@ class Store private constructor(private val app: Context) {
         holdAlert(
             alert = Bridge.alertJson(
                 Bridge.nextAlertId(), pattern, color, durationMs, speedMs, brightness,
+                AlertSource.PREVIEW,
             ),
             durationMs = durationMs,
             arm = true,
@@ -914,26 +971,95 @@ class Store private constructor(private val app: Context) {
     }
 
     private fun send(enabled: Boolean, alert: JSONObject?, arm: Boolean = true) {
+        if (rootTransition) return
         val guards = guardState()
         val suppressed = guards.suppression()
         _suppression.value = suppressed
 
         val blocked = if (activeAlert != null) guards.alertSuppression() else suppressed
+        val privacyAllowed = enabled && guards.alertSuppression() == null &&
+            _privacyRules.value.any { it.enabled }
+        val active = backend()
+        val previous = drivingTransport
+        if (handoffTarget != null) {
+            pendingHandoff = PendingOutput(enabled, alert, arm)
+            return
+        }
+        if (previous != null && previous != active.transport) {
+            beginHandoff(previous, active.transport, PendingOutput(enabled, alert, arm))
+            return
+        }
+        val revision = ++stateRevision
         val json = Bridge.stateJson(
             enabled && blocked == null,
             _priority.value, _ambient.value, alert, _ambientTimeoutMs.value, arm, dimFactor(),
+            privacyRules = _privacyRules.value,
+            privacyObserverEnabled = privacyAllowed,
+            privacyOutputEnabled = privacyAllowed,
+            stateRevision = revision,
         )
-        val active = backend()
         active.push(json)
         standDown(active.transport)
+        drivingTransport = active.transport
         _activeTransport.value = active.transport
         refreshStatus()
+    }
+
+    private fun beginHandoff(from: Transport, to: Transport, output: PendingOutput) {
+        handoffTarget = to
+        pendingHandoff = output
+        val generation = ++handoffGeneration
+        val idleRevision = ++stateRevision
+        val idle = Bridge.stateJson(
+            false, _priority.value, _ambient.value, null, _ambientTimeoutMs.value,
+            arm = false, dim = dimFactor(), privacyRules = emptyList(),
+            privacyObserverEnabled = false, privacyOutputEnabled = false,
+            stateRevision = idleRevision,
+        )
+        backendFor(from).push(idle)
+        val deadline = SystemClock.elapsedRealtime() + 2_000
+
+        fun awaitAck() {
+            if (generation != handoffGeneration || handoffTarget != to) return
+            val status = backendFor(from).status()
+            val acknowledged = !status.alive ||
+                (status.appliedStateRevision == idleRevision && !status.privacyObserverEnabled)
+            if (acknowledged) {
+                val pending = pendingHandoff
+                handoffTarget = null
+                pendingHandoff = null
+                drivingTransport = to
+                if (pending != null) send(pending.enabled, pending.alert, pending.arm)
+                return
+            }
+            if (SystemClock.elapsedRealtime() >= deadline) {
+                Log.w(TAG, "renderer handoff timed out; leaving both outputs disabled")
+                handoffTarget = null
+                pendingHandoff = null
+                drivingTransport = from
+                _status.value = HelperStatus(alive = false)
+                return
+            }
+            main.postDelayed(::awaitAck, 50)
+        }
+        main.post(::awaitAck)
+    }
+
+    private fun backendFor(transport: Transport): Backend = when (transport) {
+        Transport.ADB -> adb
+        Transport.SHIZUKU -> shizuku
+        Transport.ROOT -> root
+        Transport.AUTO -> backend()
     }
 
     private fun standDown(driving: Transport) {
         val idle = Bridge.stateJson(
             false, _priority.value, _ambient.value, null, _ambientTimeoutMs.value,
             arm = false, dim = dimFactor(),
+            privacyRules = emptyList(),
+            privacyObserverEnabled = false,
+            privacyOutputEnabled = false,
+            stateRevision = ++stateRevision,
         )
         if (driving == Transport.SHIZUKU) {
             Bridge.writeState(app, idle)
@@ -942,8 +1068,35 @@ class Store private constructor(private val app: Context) {
         }
     }
 
+    private fun beginRootStart() {
+        if (rootTransition || root.state.value == RootBackend.State.RUNNING) return
+        rootTransition = true
+        val revision = ++stateRevision
+        val staged = Bridge.stateJson(
+            enabled = false,
+            priority = _priority.value,
+            ambient = _ambient.value,
+            alert = null,
+            ambientTimeoutMs = _ambientTimeoutMs.value,
+            arm = false,
+            dim = dimFactor(),
+            privacyRules = emptyList(),
+            privacyObserverEnabled = false,
+            privacyOutputEnabled = false,
+            stateRevision = revision,
+        )
+        Bridge.writeState(app, staged)
+        if (shizuku.state.value == ShizukuBackend.State.CONNECTED) shizuku.push(staged)
+        root.ensureStarted(revision) {
+            rootTransition = false
+            pushCurrent(arm = false)
+        }
+    }
+
     fun refreshStatus() {
-        if (_transport.value != Transport.ADB) shizuku.refresh()
+        if (_transport.value != Transport.ADB && root.state.value != RootBackend.State.RUNNING) {
+            shizuku.refresh()
+        }
         val active = backend()
         _status.value = active.status()
         _activeTransport.value = active.transport
@@ -974,6 +1127,22 @@ class Store private constructor(private val app: Context) {
         _rules.value.forEach { a.put(it.toPrefsJson()) }
         prefs.edit().putString("rules", a.toString()).apply()
         pruneLastMatch()
+    }
+
+    private fun loadPrivacyRules(): List<PrivacyRule> =
+        prefs.getString("privacyRules", null)?.let { raw ->
+            runCatching {
+                val a = JSONArray(raw)
+                (0 until a.length()).mapNotNull { i ->
+                    runCatching { PrivacyRule.fromJson(a.getJSONObject(i)) }.getOrNull()
+                }
+            }.getOrNull()
+        } ?: emptyList()
+
+    private fun savePrivacyRules() {
+        val a = JSONArray()
+        _privacyRules.value.forEach { a.put(it.toPrefsJson()) }
+        prefs.edit().putString("privacyRules", a.toString()).apply()
     }
 
     private fun loadConversations(): List<ConversationRef> =

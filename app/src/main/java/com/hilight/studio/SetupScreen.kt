@@ -40,8 +40,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 const val ADB_RESET =
     "adb shell \"pkill -f 'com.hilight.(core.AdbHelper|studio:hilight)'\""
@@ -65,6 +67,7 @@ fun SetupScreen(store: Store) {
     val transport by store.transport.collectAsStateWithLifecycle()
     val active by store.activeTransport.collectAsStateWithLifecycle()
     val shizukuState by store.shizuku.state.collectAsStateWithLifecycle()
+    val rootState by store.root.state.collectAsStateWithLifecycle()
     val priority by store.priority.collectAsStateWithLifecycle()
     val dynamicColor by store.dynamicColor.collectAsStateWithLifecycle()
     val timeoutMs by store.ambientTimeoutMs.collectAsStateWithLifecycle()
@@ -87,8 +90,20 @@ fun SetupScreen(store: Store) {
     val notifNeeded = rules.any { it.enabled && it.trigger == Trigger.NOTIFICATION }
     var inspecting by remember { mutableStateOf(false) }
     var forgetting by remember { mutableStateOf(false) }
+    var checkingForUpdates by remember { mutableStateOf(false) }
+    var updateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
+    val updateScope = rememberCoroutineScope()
     val conversations by store.conversations.collectAsStateWithLifecycle()
 
+    val checkForUpdates: () -> Unit = {
+        checkingForUpdates = true
+        updateScope.launch {
+            updateResult = withContext(Dispatchers.IO) {
+                GitHubUpdateChecker.check(BuildConfig.VERSION_NAME)
+            }
+            checkingForUpdates = false
+        }
+    }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -176,28 +191,70 @@ fun SetupScreen(store: Store) {
         }
     }
 
-    PixelCard(tone = 2) {
-        SectionTitle(stringResource(R.string.setup_privileged_title))
-        Caption(stringResource(R.string.setup_privileged_body))
-        // Resolved up here because the selector's label lambda is not composable.
-        val transportLabels = Transport.entries.associateWith { stringResource(it.labelRes) }
-        SegmentedSelector(
-            options = Transport.entries,
-            selected = transport,
-            label = { transportLabels.getValue(it) },
-            onSelect = { store.setTransport(it) },
-        )
-        if (transport == Transport.AUTO) Caption(stringResource(R.string.setup_transport_auto_note))
-    }
+    val rootPresent = rootState in setOf(
+        RootBackend.State.AVAILABLE,
+        RootBackend.State.REQUESTING,
+        RootBackend.State.STARTING,
+        RootBackend.State.RUNNING,
+    )
+    if (rootPresent) {
+        PixelCard(tone = 2) {
+            SectionTitle(
+                stringResource(R.string.setup_root_title),
+                trailing = {
+                    LivePill(
+                        stringResource(
+                            if (rootState == RootBackend.State.RUNNING)
+                                R.string.setup_root_active else R.string.setup_root_available
+                        ),
+                        ok = true,
+                    )
+                },
+            )
+            Caption(
+                stringResource(
+                    when (rootState) {
+                        RootBackend.State.AVAILABLE -> R.string.setup_root_available_body
+                        RootBackend.State.REQUESTING -> R.string.setup_root_requesting_body
+                        RootBackend.State.STARTING -> R.string.setup_root_starting_body
+                        else -> R.string.setup_root_active_body
+                    }
+                )
+            )
+        }
+    } else {
+        PixelCard(tone = 2) {
+            SectionTitle(stringResource(R.string.setup_privileged_title))
+            Caption(stringResource(R.string.setup_privileged_body))
+            val selectable = listOf(Transport.AUTO, Transport.SHIZUKU, Transport.ADB)
+            val transportLabels = selectable.associateWith { stringResource(it.labelRes) }
+            SegmentedSelector(
+                options = selectable,
+                selected = transport.takeIf { it in selectable } ?: Transport.AUTO,
+                label = { transportLabels.getValue(it) },
+                onSelect = { store.setTransport(it) },
+            )
+            if (transport == Transport.AUTO) Caption(stringResource(R.string.setup_transport_auto_note))
+            if (rootState == RootBackend.State.DENIED || rootState == RootBackend.State.ERROR) {
+                Caption(
+                    store.root.errorText()
+                        ?: stringResource(R.string.setup_root_error_body)
+                )
+                TextButton(onClick = store::retryRoot) {
+                    ButtonLabel(stringResource(R.string.setup_root_retry))
+                }
+            }
+        }
 
-    AnimatedContent(
-        targetState = transport,
-        transitionSpec = { fadeIn(tween(180)).togetherWith(fadeOut(tween(120))) },
-        label = "transportCards",
-    ) { t ->
-        Column {
-            if (t != Transport.SHIZUKU) AdbCard(ctx, store)
-            if (t != Transport.ADB) ShizukuCard(store, shizukuState)
+        AnimatedContent(
+            targetState = transport,
+            transitionSpec = { fadeIn(tween(180)).togetherWith(fadeOut(tween(120))) },
+            label = "transportCards",
+        ) { t ->
+            Column {
+                if (t != Transport.SHIZUKU) AdbCard(ctx, store)
+                if (t != Transport.ADB) ShizukuCard(store, shizukuState)
+            }
         }
     }
 
@@ -268,6 +325,59 @@ fun SetupScreen(store: Store) {
         SectionTitle(stringResource(R.string.setup_appearance_title))
         ToggleRow(stringResource(R.string.setup_wallpaper_colours), dynamicColor) {
             store.setDynamicColor(it)
+        }
+    }
+
+    PixelCard {
+        SectionTitle(
+            stringResource(R.string.setup_updates_title),
+            trailing = {
+                Caption(
+                    stringResource(
+                        R.string.setup_updates_installed,
+                        BuildConfig.VERSION_NAME,
+                    )
+                )
+            },
+        )
+        when {
+            checkingForUpdates -> Caption(stringResource(R.string.setup_updates_checking))
+            updateResult == null -> Caption(stringResource(R.string.setup_updates_body))
+            updateResult is UpdateCheckResult.Available -> Caption(
+                stringResource(
+                    R.string.setup_updates_available,
+                    (updateResult as UpdateCheckResult.Available).release.versionName,
+                )
+            )
+            updateResult is UpdateCheckResult.Current ->
+                Caption(stringResource(R.string.setup_updates_current))
+            updateResult is UpdateCheckResult.NoPublishedRelease ->
+                Caption(stringResource(R.string.setup_updates_none))
+            else -> Caption(stringResource(R.string.setup_updates_failed))
+        }
+
+        val available = updateResult as? UpdateCheckResult.Available
+        if (available != null && !checkingForUpdates) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(onClick = { openRelease(ctx, available.release.pageUrl) }) {
+                    ButtonLabel(stringResource(R.string.setup_updates_view_release))
+                }
+                TextButton(onClick = checkForUpdates) {
+                    ButtonLabel(stringResource(R.string.setup_updates_check_again))
+                }
+            }
+        } else {
+            FilledTonalButton(
+                onClick = checkForUpdates,
+                enabled = !checkingForUpdates,
+            ) {
+                ButtonLabel(
+                    stringResource(
+                        if (checkingForUpdates) R.string.setup_updates_checking
+                        else R.string.setup_updates_check,
+                    )
+                )
+            }
         }
     }
 
@@ -653,6 +763,12 @@ private fun openShizuku(ctx: Context) {
 
 private fun openShizukuListing(ctx: Context) {
     val uri = Uri.parse("https://shizuku.rikka.app/")
+    runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
+        .onFailure { Toast.makeText(ctx, R.string.setup_no_browser, Toast.LENGTH_SHORT).show() }
+}
+
+private fun openRelease(ctx: Context, pageUrl: String) {
+    val uri = Uri.parse(pageUrl)
     runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, uri)) }
         .onFailure { Toast.makeText(ctx, R.string.setup_no_browser, Toast.LENGTH_SHORT).show() }
 }

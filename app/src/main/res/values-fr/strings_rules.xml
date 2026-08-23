@@ -109,5 +109,30 @@
     <string name="rules_off_title">HiLight est désactivé</string>
     <string name="rules_off_pill">désactivé</string>
     <string name="rules_off_body">Les règles ne fonctionnent que lorsque HiLight est activé. Activez-le depuis l\'onglet Direct.</string>
-
+    <!-- Privacy activity rules -->
+    <string name="privacy_section_title">Activit\u00e9 de confidentialit\u00e9</string>
+    <string name="privacy_intro">Utilisez HiLight pendant qu\'Android signale que le micro ou l\'appareil photo est actif.</string>
+    <string name="privacy_default_summary">Par d\u00e9faut : 10 secondes allum\u00e9, 10 secondes de repos, et arr\u00eat au bout d\'1 minute ou plus t\u00f4t si l\'utilisation cesse. L\'animation, la couleur et les dur\u00e9es sont modifiables.</string>
+    <string name="privacy_add">Ajouter une activit\u00e9</string>
+    <string name="privacy_add_for_app">Ajouter une activit\u00e9 pour cette appli</string>
+    <string name="privacy_choose_activity">Choisissez une activit\u00e9</string>
+    <string name="privacy_microphone">Micro</string>
+    <string name="privacy_camera">Appareil photo</string>
+    <string name="privacy_microphone_active">Micro actif</string>
+    <string name="privacy_camera_active">Appareil photo actif</string>
+    <string name="privacy_microphone_hint">Se d\u00e9clenche pendant qu\'une appli enregistre du son.</string>
+    <string name="privacy_camera_hint">Se d\u00e9clenche pendant qu\'une appli utilise l\'appareil photo.</string>
+    <string name="privacy_card_summary">%1$s allum\u00e9 \u00b7 %2$s de repos</string>
+    <string name="privacy_observation_note">HiLight observe le signal de confidentialit\u00e9 d\'Android depuis le renderer privil\u00e9gi\u00e9. Il ne lit aucun enregistrement.</string>
+    <string name="privacy_light_time">Dur\u00e9e d\'\u00e9clairage</string>
+    <string name="privacy_allow_long_light">Autoriser plus de 30 secondes</string>
+    <string name="privacy_long_warn_first_title">\u00c9clairer plus de 30 secondes ?</string>
+    <string name="privacy_long_warn_first_body">L\'array restera actif pendant la majeure partie de la fen\u00eatre d\'une minute. Une dur\u00e9e plus courte avec un vrai repos est plus s\u00fbre.</string>
+    <string name="privacy_long_warn_second_title">Utiliser la dur\u00e9e \u00e9tendue ?</string>
+    <string name="privacy_long_warn_second_body">L\'usage continu prolong\u00e9 n\'a pas \u00e9t\u00e9 test\u00e9 sur ce mat\u00e9riel. La limite d\'une minute par \u00e9pisode reste appliqu\u00e9e.</string>
+    <string name="privacy_cooldown">Dur\u00e9e de repos</string>
+    <string name="privacy_cooldown_recommendation">Un repos de 10 \u00e0 20 secondes est recommand\u00e9.</string>
+    <string name="privacy_cooldown_short_warning">En dessous de 10 secondes, l\'array n\'a presque aucun repos. Un repos de 10 \u00e0 20 secondes est recommand\u00e9.</string>
+    <string name="privacy_one_minute_cap">S\'arr\u00eate d\u00e8s que l\'utilisation cesse. Une utilisation ininterrompue peut se signaler pendant 1 minute au maximum.</string>
+    <string name="privacy_replace_warning">L\'enregistrement remplacera la r\u00e8gle existante pour cette activit\u00e9 et cette appli.</string>
 </resources>

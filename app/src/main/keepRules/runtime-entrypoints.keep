@@ -1,0 +1,16 @@
+# Launched by class name from adb/root app_process; there is no Java call site for R8 to follow.
+-keep class com.hilight.core.AdbHelper {
+    public static void main(java.lang.String[]);
+}
+
+# Instantiated by Shizuku using the configured class name and no-argument constructor.
+-keep class com.hilight.studio.HiLightUserService {
+    public <init>();
+    public *;
+}
+
+# Conscrypt ships legacy adapters for platform SSL internals that no longer exist on modern Android.
+# They are unreachable here, but R8 still resolves their references. Only this fork pulls Conscrypt
+# in, through the ADB client used by built-in access, so upstream never hits this.
+-dontwarn com.android.org.conscrypt.SSLParametersImpl
+-dontwarn org.apache.harmony.xnet.provider.jsse.SSLParametersImpl
