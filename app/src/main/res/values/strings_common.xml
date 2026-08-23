@@ -54,6 +54,7 @@
     <string name="transport_auto">Auto</string>
     <string name="transport_shizuku">Shizuku</string>
     <string name="transport_adb">ADB helper</string>
+    <string name="transport_root">Root</string>
 
     <!-- Durations. Kept as separate forms rather than built by concatenation, because the unit does
          not simply follow the number in every language. -->
@@ -74,7 +75,6 @@
     <string name="common_keep_it_short">Keep it short</string>
     <string name="common_none">none</string>
     <string name="common_i_understand">I understand</string>
-    <string name="common_off_lowercase">off</string>
     <string name="common_percent">%1$d%%</string>
 
     <!-- Said of a phone HiLight has no drawing for, in place of a model name -->

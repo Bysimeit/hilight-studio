@@ -43,6 +43,17 @@ jobs:
       - name: Test, build, and lint
         run: ./gradlew --no-daemon :app:testDebugUnitTest :app:build :app:lint
 
+      - name: Build standalone helper
+        run: ./scripts/build-helper.sh
+
+      - name: Verify optimized privileged entry points
+        run: |
+          release_apk=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          test -n "$release_apk"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer" dex packages "$release_apk" > "$RUNNER_TEMP/dex-packages.txt"
+          grep -q 'com.hilight.core.AdbHelper' "$RUNNER_TEMP/dex-packages.txt"
+          grep -q 'com.hilight.studio.HiLightUserService' "$RUNNER_TEMP/dex-packages.txt"
+
       - name: Keep the reports of a failed check
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

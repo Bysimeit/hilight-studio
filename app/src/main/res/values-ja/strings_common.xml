@@ -82,6 +82,7 @@
     <string name="transport_shizuku">Shizuku</string>
     <!-- "ADB helper" -->
     <string name="transport_adb">ADB ヘルパー</string>
+    <string name="transport_root">Root</string>
 
     <!-- Durations. Japanese puts the unit straight after the number with no space, which is why these
          are resources rather than concatenation. -->
@@ -118,7 +119,6 @@
     <!-- "I understand" -->
     <string name="common_i_understand">理解しました</string>
     <!-- "off" -->
-    <string name="common_off_lowercase">オフ</string>
     <!-- "%1$d%%" -->
     <string name="common_percent">%1$d%%</string>
 

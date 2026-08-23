@@ -24,7 +24,7 @@ body:
     id: transport
     attributes:
       label: Renderer transport
-      options: [Shizuku, ADB]
+      options: [Root, Shizuku, ADB]
     validations:
       required: true
   - type: textarea
@@ -51,3 +51,8 @@ body:
     attributes:
       label: Additional context
       description: Add logs or screenshots only after removing notification contents and personal data.
+  - type: input
+    id: privacy-activity
+    attributes:
+      label: Privacy activity rule, if relevant
+      description: Say whether this involved microphone or camera activity and whether the rule was for any app or one app. Do not include personal data.

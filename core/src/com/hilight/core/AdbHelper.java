@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 
+import org.json.JSONObject;
+
 public final class AdbHelper {
     private static final long POLL_MS = 100;
     private static final long STATUS_MS = 1000;
@@ -13,32 +15,38 @@ public final class AdbHelper {
 
     private final File stateFile;
     private final File statusFile;
+    private final String owner;
     private final Engine engine = new Engine();
 
     private long stamp = -1, size = -1, lastStatusWarn;
 
     public static void main(String[] args) {
         String dir = DEFAULT_DIR;
-        for (int i = 0; i < args.length - 1; i++) if ("--dir".equals(args[i])) dir = args[i + 1];
+        String owner = "adb";
+        for (int i = 0; i < args.length - 1; i++) {
+            if ("--dir".equals(args[i])) dir = args[i + 1];
+            if ("--owner".equals(args[i])) owner = args[i + 1];
+        }
         try {
-            new AdbHelper(new File(dir)).run();
+            new AdbHelper(new File(dir), owner).run();
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);
         }
     }
 
-    private AdbHelper(File dir) {
+    private AdbHelper(File dir, String owner) {
         if (!dir.isDirectory()) {
             Log.w("no " + dir + " yet — open HiLight Studio once so it can create the bridge files");
         }
         stateFile = new File(dir, "state.json");
         statusFile = new File(dir, "helper_status.json");
+        this.owner = owner;
     }
 
     private void run() throws Exception {
         engine.start();
-        Log.i("watching " + stateFile);
+        Log.i("watching bridge as " + owner);
         long lastStatus = 0;
         while (true) {
             long now = System.currentTimeMillis();
@@ -70,7 +78,9 @@ public final class AdbHelper {
             return;
         }
         try {
-            byte[] data = engine.status().getBytes(StandardCharsets.UTF_8);
+            JSONObject status = new JSONObject(engine.status());
+            status.put("owner", owner);
+            byte[] data = status.toString().getBytes(StandardCharsets.UTF_8);
             try (FileOutputStream f = new FileOutputStream(statusFile, false)) {
                 f.write(data);
             }

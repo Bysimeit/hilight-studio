@@ -56,6 +56,21 @@ enum class Pattern(
 
 enum class Trigger { NOTIFICATION, FOREGROUND, RINGING, CALL }
 
+enum class AlertSource(val key: String) {
+    NOTIFICATION("notification"), PREVIEW("preview"), FOREGROUND("foreground"), CALL("call")
+}
+
+/** A continuous Android privacy operation observed by the privileged renderer. */
+enum class PrivacyActivity(val key: String, val appOp: String) {
+    MICROPHONE("microphone", "android:record_audio"),
+    CAMERA("camera", "android:camera");
+
+    companion object {
+        fun of(key: String): PrivacyActivity? = entries.firstOrNull { it.key == key }
+    }
+}
+
+/** The always-on look: what HiLight shows when nothing else is happening. */
 data class Ambient(
     val pattern: Pattern = Pattern.OFF,
     val color: Int = 0xFF7C4DFF.toInt(),
@@ -245,6 +260,111 @@ data class AppRule(
     }
 }
 
+/** One microphone/camera activity signal, deliberately separate from notification/app-open rules. */
+data class PrivacyRule(
+    val activity: PrivacyActivity,
+    val pkg: String = AppRule.ANY_APP,
+    val appLabel: String = "",
+    val enabled: Boolean = true,
+    val pattern: Pattern = Pattern.BLINK,
+    val color: Int,
+    val secondColor: Int = 0xFF00E5FF.toInt(),
+    val lightMs: Int = DEFAULT_LIGHT_MS,
+    val cooldownMs: Int = DEFAULT_COOLDOWN_MS,
+    val speedMs: Int = 800,
+    val brightness: Float = 1f,
+) {
+    val id: String get() = "${activity.key}|$pkg"
+    val isCatchAll: Boolean get() = pkg == AppRule.ANY_APP
+
+    fun toPrefsJson(): JSONObject = JSONObject().apply {
+        put("activity", activity.key)
+        put("pkg", pkg)
+        put("appLabel", appLabel)
+        put("enabled", enabled)
+        put("pattern", pattern.key)
+        put("color", color.toUInt().toLong())
+        put("secondColor", secondColor.toUInt().toLong())
+        put("lightMs", lightMs)
+        put("cooldownMs", cooldownMs)
+        put("speedMs", speedMs)
+        put("brightness", brightness.toDouble())
+    }
+
+    /** The renderer does not need the translated app label. */
+    fun toRendererJson(): JSONObject = JSONObject().apply {
+        put("id", id)
+        put("activity", activity.key)
+        put("pkg", pkg)
+        put("pattern", pattern.key)
+        if (pattern == Pattern.GRADIENT) {
+            put(
+                "colors",
+                JSONArray()
+                    .put(color.toUInt().toLong())
+                    .put(secondColor.toUInt().toLong()),
+            )
+        } else {
+            put("color", color.toUInt().toLong())
+        }
+        put("lightMs", lightMs.coerceIn(MIN_PHASE_MS, MAX_PHASE_MS))
+        put("cooldownMs", cooldownMs.coerceIn(MIN_PHASE_MS, MAX_PHASE_MS))
+        put("speedMs", speedMs.coerceIn(100, 10_000))
+        put("brightness", brightness.coerceIn(0.05f, 1f).toDouble())
+    }
+
+    companion object {
+        const val DEFAULT_LIGHT_MS = 10_000
+        const val DEFAULT_COOLDOWN_MS = 10_000
+        const val MIN_PHASE_MS = 1_000
+        const val MAX_PHASE_MS = 60_000
+
+        /** Every built-in one-rule look; Off and per-LED Custom are not trigger effects. */
+        val selectablePatterns: List<Pattern>
+            get() = Pattern.entries.filter { it != Pattern.OFF && it != Pattern.CUSTOM }
+
+        fun default(
+            activity: PrivacyActivity,
+            pkg: String = AppRule.ANY_APP,
+            appLabel: String = "",
+        ): PrivacyRule = PrivacyRule(
+            activity = activity,
+            pkg = pkg,
+            appLabel = appLabel,
+            color = when (activity) {
+                PrivacyActivity.MICROPHONE -> 0xFFFF1744.toInt()
+                PrivacyActivity.CAMERA -> 0xFF00E676.toInt()
+            },
+        )
+
+        /** Unknown future activities are ignored so an older app can still load the remaining list. */
+        fun fromJson(o: JSONObject): PrivacyRule? {
+            val activity = PrivacyActivity.of(o.optString("activity")) ?: return null
+            val defaults = default(activity)
+            return PrivacyRule(
+                activity = activity,
+                pkg = o.optString("pkg", AppRule.ANY_APP),
+                appLabel = o.optString("appLabel", ""),
+                enabled = o.optBoolean("enabled", true),
+                pattern = Pattern.of(o.optString("pattern", defaults.pattern.key)),
+                color = o.optLong("color", defaults.color.toUInt().toLong()).toInt(),
+                secondColor = o.optLong(
+                    "secondColor",
+                    defaults.secondColor.toUInt().toLong(),
+                ).toInt(),
+                lightMs = o.optInt("lightMs", DEFAULT_LIGHT_MS)
+                    .coerceIn(MIN_PHASE_MS, MAX_PHASE_MS),
+                cooldownMs = o.optInt("cooldownMs", DEFAULT_COOLDOWN_MS)
+                    .coerceIn(MIN_PHASE_MS, MAX_PHASE_MS),
+                speedMs = o.optInt("speedMs", defaults.speedMs).coerceIn(100, 10_000),
+                brightness = o.optDouble("brightness", defaults.brightness.toDouble()).toFloat()
+                    .coerceIn(0.05f, 1f),
+            )
+        }
+    }
+}
+
+/** A saved look. Only the ambient config is stored; rules are separate. */
 data class Preset(val name: String, val ambient: Ambient) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("name", name)
@@ -282,6 +402,8 @@ data class HelperStatus(
     val alive: Boolean,
     val ageMs: Long = -1,
     val pid: Int = -1,
+    val uid: Int = -1,
+    val owner: String = "",
     val ledCount: Int = 0,
     val sessionOpen: Boolean = false,
     val mode: String = "-",
@@ -293,6 +415,10 @@ data class HelperStatus(
     val resting: Boolean = false,
 
     val dutyPct: Int = 0,
+    val appliedStateRevision: Long = 0,
+    val privacyObserverEnabled: Boolean = false,
+    val privacyObserverState: String = "stopped",
+    val privacyPhase: String = "inactive",
 )
 
 const val LED_COUNT = 8

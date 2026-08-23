@@ -121,6 +121,19 @@
     <string name="setup_appearance_title">Appearance</string>
     <string name="setup_wallpaper_colours">Wallpaper colours</string>
 
+    <!-- Manual GitHub update check -->
+    <string name="setup_updates_title">Updates</string>
+    <string name="setup_updates_installed">Installed %1$s</string>
+    <string name="setup_updates_body">Check GitHub for a newer experimental release.</string>
+    <string name="setup_updates_check">Check for updates</string>
+    <string name="setup_updates_checking">Checking GitHub…</string>
+    <string name="setup_updates_available">Version %1$s is available.</string>
+    <string name="setup_updates_view_release">View release</string>
+    <string name="setup_updates_check_again">Check again</string>
+    <string name="setup_updates_current">You are up to date.</string>
+    <string name="setup_updates_none">No published releases were found.</string>
+    <string name="setup_updates_failed">Could not check for updates. Check your connection and try again.</string>
+
     <!-- The self test posts a real notification from this app, so the channel name is seen in the
          system's own notification settings as well. -->
     <string name="setup_test_title">End-to-end test</string>
@@ -184,4 +197,15 @@
     <string name="builtin_pairing_done">Paired.</string>
     <string name="builtin_pairing_failed">Pairing did not finish.</string>
     <string name="builtin_manual_body">Only needed if Wireless debugging is unavailable. Run both lines with the phone plugged in, and re-run them after every reboot.</string>
+
+    <string name="setup_root_title">Privileged access</string>
+    <string name="setup_root_available">Root available</string>
+    <string name="setup_root_active">Root active</string>
+    <string name="setup_root_available_body">HiLight found root. Turn HiLight on and approve the one-time request from your root manager. No Shizuku or ADB setup is needed.</string>
+    <string name="setup_root_requesting_body">Waiting for your root manager’s approval.</string>
+    <string name="setup_root_starting_body">Starting the HiLight renderer with root access.</string>
+    <string name="setup_root_active_body">HiLight is using root directly. No Shizuku or ADB setup is needed.</string>
+    <string name="setup_root_error_body">Root could not be started. You can retry or use another setup method.</string>
+    <string name="setup_root_retry">Retry root</string>
+
 </resources>

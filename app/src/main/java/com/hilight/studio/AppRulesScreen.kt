@@ -78,7 +78,7 @@ import kotlinx.coroutines.withContext
 fun ruleLabel(rule: AppRule): String =
     if (rule.isCatchAll) stringResource(R.string.rules_any_app) else rule.label
 
-private data class InstalledApp(val pkg: String, val label: String, val info: ApplicationInfo?)
+data class InstalledApp(val pkg: String, val label: String, val info: ApplicationInfo?)
 
 /** "Show X for app Y" rules, plus the per-chat rules nested under the app they belong to. */
 @Composable
@@ -87,12 +87,17 @@ fun AppRulesScreen(store: Store) {
     val rules by store.rules.collectAsStateWithLifecycle()
     val enabled by store.enabled.collectAsStateWithLifecycle()
     val status by store.status.collectAsStateWithLifecycle()
+    val privacyRules by store.privacyRules.collectAsStateWithLifecycle()
     val conversations by store.conversations.collectAsStateWithLifecycle()
     val lastMatch by store.lastMatch.collectAsStateWithLifecycle()
     var picking by remember { mutableStateOf(false) }
     var scoping by remember { mutableStateOf<InstalledApp?>(null) }
     var pickingChatIn by remember { mutableStateOf<InstalledApp?>(null) }
     var editing by remember { mutableStateOf<AppRule?>(null) }
+    var editingPrivacy by remember { mutableStateOf<PrivacyRule?>(null) }
+    var choosingPrivacyActivity by remember { mutableStateOf(false) }
+    var privacyPrefilledApp by remember { mutableStateOf<InstalledApp?>(null) }
+    var pickingPrivacyAppFor by remember { mutableStateOf<PrivacyActivity?>(null) }
     var usageMissing by remember { mutableStateOf(false) }
     var notifMissing by remember { mutableStateOf(false) }
 
@@ -232,6 +237,18 @@ fun AppRulesScreen(store: Store) {
         }
     }
 
+    PrivacyRulesSection(
+        rules = privacyRules,
+        onAdd = {
+            privacyPrefilledApp = null
+            choosingPrivacyActivity = true
+        },
+        onToggle = { store.upsertPrivacyRule(it.copy(enabled = !it.enabled), replacing = it) },
+        onEdit = { editingPrivacy = it },
+        onTest = { store.preview(it.pattern, it.color, it.speedMs, it.brightness, it.lightMs) },
+        onDelete = store::removePrivacyRule,
+    )
+
     if (picking) {
         AppPickerDialog(
             onDismiss = { picking = false },
@@ -300,6 +317,55 @@ fun AppRulesScreen(store: Store) {
                 editing = null
             },
             onTest = { store.preview(it.pattern, it.color, it.speedMs, it.brightness, it.durationMs) },
+            onAddPrivacy = if (rule.isConversationRule || rule.isCatchAll) null else ({
+                editing = null
+                privacyPrefilledApp = InstalledApp(rule.pkg, rule.label, null)
+                choosingPrivacyActivity = true
+            }),
+        )
+    }
+
+    if (choosingPrivacyActivity) {
+        PrivacyActivityPickerDialog(
+            onDismiss = {
+                choosingPrivacyActivity = false
+                privacyPrefilledApp = null
+            },
+            onPick = { activity ->
+                choosingPrivacyActivity = false
+                val app = privacyPrefilledApp
+                privacyPrefilledApp = null
+                if (app == null) {
+                    pickingPrivacyAppFor = activity
+                } else {
+                    val fresh = PrivacyRule.default(activity, app.pkg, app.label)
+                    editingPrivacy = privacyRules.firstOrNull { it.id == fresh.id } ?: fresh
+                }
+            },
+        )
+    }
+
+    pickingPrivacyAppFor?.let { activity ->
+        AppPickerDialog(
+            onDismiss = { pickingPrivacyAppFor = null },
+            onPick = { app ->
+                pickingPrivacyAppFor = null
+                val fresh = PrivacyRule.default(activity, app.pkg, app.label)
+                editingPrivacy = privacyRules.firstOrNull { it.id == fresh.id } ?: fresh
+            },
+        )
+    }
+
+    editingPrivacy?.let { rule ->
+        PrivacyRuleEditorDialog(
+            rule = rule,
+            existing = privacyRules,
+            onDismiss = { editingPrivacy = null },
+            onSave = {
+                store.upsertPrivacyRule(it, replacing = rule)
+                editingPrivacy = null
+            },
+            onTest = { store.preview(it.pattern, it.color, it.speedMs, it.brightness, it.lightMs) },
         )
     }
 }
@@ -518,7 +584,7 @@ private fun RuleCard(
 }
 
 @Composable
-private fun AppPickerDialog(onDismiss: () -> Unit, onPick: (InstalledApp) -> Unit) {
+fun AppPickerDialog(onDismiss: () -> Unit, onPick: (InstalledApp) -> Unit) {
     val ctx = LocalContext.current
     var query by remember { mutableStateOf("") }
     val apps by produceState(initialValue = emptyList<InstalledApp>()) {
@@ -631,6 +697,7 @@ private fun RuleEditorDialog(
     onDismiss: () -> Unit,
     onSave: (AppRule) -> Unit,
     onTest: (AppRule) -> Unit,
+    onAddPrivacy: (() -> Unit)?,
 ) {
     var r by remember { mutableStateOf(rule) }
 
@@ -795,6 +862,12 @@ private fun RuleEditorDialog(
 
                 FilledTonalButton(onClick = { onTest(r) }, modifier = Modifier.fillMaxWidth()) {
                     ButtonLabel(stringResource(R.string.rules_test_on_leds))
+                }
+
+                if (onAddPrivacy != null) {
+                    TextButton(onClick = onAddPrivacy, modifier = Modifier.fillMaxWidth()) {
+                        ButtonLabel(stringResource(R.string.privacy_add_for_app))
+                    }
                 }
 
                 // Last in the column, so it is the final thing read before Save. The save is not

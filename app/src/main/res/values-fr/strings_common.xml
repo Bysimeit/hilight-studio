@@ -53,9 +53,8 @@
     <string name="common_keep_it_short">Restez bref</string>
     <string name="common_none">aucun</string>
     <string name="common_i_understand">J\'ai compris</string>
-    <string name="common_off_lowercase">éteint</string>
     <string name="common_percent">%1$d %%</string>
 
     <string name="device_generic">cet appareil</string>
-
+    <string name="transport_root">Root</string>
 </resources>

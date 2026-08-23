@@ -50,26 +50,31 @@ app.
 
 ## Architecture
 
-The renderer core (`core/src`) is shared, and there are two ways to get it into a shell-UID process.
+The renderer core (`core/src`) is shared. It can run as root, or as the shell UID through Shizuku or
+ADB.
 
 ```
-HiLight Studio (normal app)                    privileged renderer (uid 2000 = shell)
+HiLight Studio (normal app)                    privileged renderer (uid 0 or 2000)
 ┌─────────────────────────────────┐            ┌────────────────────────────────────┐
 │ Compose UI: Live/Ambient/Apps   │  binder    │ Shizuku: HiLightUserService        │
 │ NotificationTrigger (listener)  │ ─────────► │   com.hilight.studio:hilight       │
 │ ForegroundWatcher (UsageStats)  │            ├────────────────────────────────────┤
 │ Store: layering + rules         │  2 JSON    │ ADB: com.hilight.core.AdbHelper    │
-│ Transport: Auto/Built-in/Shizuku│ ◄────────► │   run from the installed APK       │
-│ AdbAccess: own ADB client       │  files     │   started by the app, or by adb    │
+│ Transport: Auto/Root/Shizuku/ADB│ ◄────────► │   run from the installed APK       │
+│ AdbAccess: own ADB client       │  files     │   started by the app, root, or adb │
 └─────────────────────────────────┘            └────────────────────────────────────┘
                                                 shared core: Engine + Renderer + LightsBackend
 ```
 
-**Built-in access (default).** The app is its own ADB client. It discovers the phone's debug daemon
-over mDNS, pairs once with the six-digit code from Wireless debugging, opens a TLS shell session to
-`127.0.0.1`, and runs the same two commands the manual flow used to ask for. From there it is the
-ADB transport: the helper polls `state.json` and writes `helper_status.json`. Discovery, pairing,
-and reconnection live in `AdbAccess`, `AdbPairingService`, and `AdbReconnect`.
+The normal app has one manual network path: tapping **Check for updates** fetches the public release
+list from GitHub. It does not run in the background and does not send rule, notification, renderer,
+or device state.
+
+**Built-in access (default without root).** The app is its own ADB client. It discovers the phone's
+debug daemon over mDNS, pairs once with the six-digit code from Wireless debugging, opens a TLS shell
+session to `127.0.0.1`, and runs the same two commands the manual flow used to ask for. From there it
+is the ADB transport: the helper polls `state.json` and writes `helper_status.json`. Discovery,
+pairing, and reconnection live in `AdbAccess`, `AdbPairingService`, and `AdbReconnect`.
 
 The pairing service (`_adb-tls-pairing._tcp`) is advertised only while the Settings pairing dialog
 is open, and the code is shown in that same dialog, so the code is collected from a notification
@@ -77,7 +82,12 @@ with a `RemoteInput` reply action rather than from a field inside the app. The R
 self-signed certificate are generated once and kept in app-private storage, so the daemon keeps
 trusting the app across reboots and updates.
 
-**Shizuku transport (preferred, no computer).** Shizuku launches `HiLightUserService` into a shell-UID
+**Root transport (automatic when available).** The app checks for `su` without elevating. When
+HiLight is turned on, it asks the root manager once, resets old renderers, and launches `AdbHelper` as
+uid 0. The app accepts the new renderer only after its PID, owner, state revision, and idle privacy
+state all match. A denied or failed request leaves output off and exposes the Shizuku/ADB fallbacks.
+
+**Shizuku transport (no computer).** Shizuku launches `HiLightUserService` into a shell-UID
 process (`daemon(true)`, so it outlives the UI) and the app holds a real binder to it. State is
 pushed straight in, no polling. Verified running as `shell` uid 2000.
 
@@ -91,17 +101,20 @@ of whoever created it. A file created by the shell is unreadable by the app, but
 into a file the app owns. So the app creates the directory and both files, and the helper only ever
 overwrites in place.
 
-Only one renderer may drive the array at a time. When Shizuku is active the app writes
-`enabled:false` to the ADB state file so any leftover helper releases the session, and if Shizuku goes
-away the app re-pushes so the ADB helper takes over.
+Only one renderer may drive the array at a time. A transport change first sends an idle state to the
+old renderer and waits for the matching revision and a stopped privacy observer. Only then is current
+state sent to the replacement. A two-second timeout fails closed: the replacement stays dark instead
+of risking two owners.
 
 Output layering, highest first:
 
 1. a finite notification alert
-2. an infinite "while this app is open" override
-3. the always-on ambient look
+2. an active microphone or camera privacy rule
+3. an infinite "while this app is open" override
+4. the always-on ambient look
 
-Turning control off blanks the LEDs and closes the session, handing HiLight back to Android.
+During a privacy-rule cooldown the renderer blanks the LEDs and closes its light session instead of
+falling through to a lower layer. Turning control off does the same, handing HiLight back to Android.
 
 ## The device illustration
 
@@ -134,6 +147,9 @@ the lamp.
 - UI → hardware: picking Solid violet at 70% produced `ff5635b2` on all 8 LEDs
 - notification path: a notification from a rule's package produced a green pulse within one frame
 - foreground path: opening Chrome produced solid `ff2979ff`, returning home restored ambient
+- privacy path: the v1.0.6 standalone helper observed Pixel Camera through AppOps, entered the camera
+  rule's lit phase with a live LED session, then returned to inactive and closed the session when the
+  camera process stopped
 - animation keeps running with the screen off (`mState=DOZE`), including the face-down case
 - turning control off closes the session and blanks the array
 - Shizuku transport: user service starts as `shell` uid 2000 with 8 LEDs, binder connects, ambient and
@@ -313,16 +329,37 @@ gives no sender at all, which no amount of code can recover. The **notification 
 Setup exists for exactly this — it shows what was extracted from each notification, and can be copied
 or shared without ever including message text.
 
+## Privacy activity rules
+
+Microphone and camera rules are separate from notification and foreground rules. A rule can target
+one package or any app. The privileged renderer observes Android's active AppOps snapshot; it never
+opens the microphone or camera and never receives their content.
+
+Callbacks are treated only as invalidation signals. After each callback the watcher reads a fresh,
+authoritative snapshot, so duplicate callbacks and process death cannot leave a reference count
+stuck. Package names are used only in memory to match the user's rules and are not written to logs or
+status files.
+
+Each continuous use gets one monotonic one-minute episode. The default cycle is 10 seconds lit and 10
+seconds released. If use stops after five seconds, output stops after five seconds. Overlapping apps
+share the same episode for an any-app rule, so switching recorders cannot restart the one-minute cap.
+Camera wins over microphone only when an eligible camera rule exists; an unconfigured camera cannot
+silence a configured microphone rule.
+
 ## Known limits
 
-- Privileged access has to be re-established after every reboot. Built-in access does this itself
-  from a `BOOT_COMPLETED` receiver, retrying over a three-minute window because Wi-Fi and the debug
-  daemon are usually not up yet at boot; the Shizuku and manual ADB routes still need the user.
-  A debug transport has to stay enabled either way — Wireless *or* USB debugging, since what the
-  renderer depends on is adbd continuing to run; see below. Removing that requirement entirely would
-  need root or an unlocked bootloader (app in `/system/priv-app`).
+- The renderer has to be restarted after every reboot. Rooted phones do this automatically when the
+  app opens after the root manager has approved it. Without root, built-in access does it itself from
+  a `BOOT_COMPLETED` receiver, retrying over a three-minute window because Wi-Fi and the debug daemon
+  are usually not up yet at boot; the Shizuku and manual ADB routes still need the user.
+- Without root, a debug transport has to stay enabled — Wireless *or* USB debugging, since what the
+  renderer depends on is adbd continuing to run; see below. Removing that requirement entirely needs
+  root or an unlocked bootloader (app in `/system/priv-app`).
 - Built-in access needs the phone to be on a Wi-Fi network: the debug daemon advertises itself over
   mDNS on that interface, and there is nothing to discover without it.
+- Root startup is covered by deterministic host tests but is not maintainer-device verified because
+  the maintainer's Pixel is intentionally unrooted. Root support is best effort across `su -c`
+  compatible root managers; community device reports are welcome.
 - If Shizuku is (re)started while HiLight Studio is already running, reopen the app so Shizuku can hand
   it access. Shizuku's own "Authorized applications" count also resets when its server restarts, so it
   may ask for approval again.

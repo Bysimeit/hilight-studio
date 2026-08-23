@@ -190,6 +190,30 @@
     <!-- "Wallpaper colours" -->
     <string name="setup_wallpaper_colours">壁紙の色</string>
 
+    <!-- Manual GitHub update check -->
+    <!-- "Updates" -->
+    <string name="setup_updates_title">アップデート</string>
+    <!-- "Installed %1$s" -->
+    <string name="setup_updates_installed">インストール済み %1$s</string>
+    <!-- "Check GitHub for a newer experimental release." -->
+    <string name="setup_updates_body">GitHub で新しい試験版リリースを確認します。</string>
+    <!-- "Check for updates" -->
+    <string name="setup_updates_check">アップデートを確認</string>
+    <!-- "Checking GitHub…" -->
+    <string name="setup_updates_checking">GitHub を確認中…</string>
+    <!-- "Version %1$s is available." -->
+    <string name="setup_updates_available">バージョン %1$s を利用できます。</string>
+    <!-- "View release" -->
+    <string name="setup_updates_view_release">リリースを見る</string>
+    <!-- "Check again" -->
+    <string name="setup_updates_check_again">再確認</string>
+    <!-- "You are up to date." -->
+    <string name="setup_updates_current">最新版です。</string>
+    <!-- "No published releases were found." -->
+    <string name="setup_updates_none">公開済みのリリースが見つかりません。</string>
+    <!-- "Could not check for updates. Check your connection and try again." -->
+    <string name="setup_updates_failed">アップデートを確認できませんでした。接続を確認して、もう一度お試しください。</string>
+
     <!-- The self test. The channel name is also seen in the system's notification settings. -->
     <!-- "End-to-end test" -->
     <string name="setup_test_title">通し動作テスト</string>
@@ -257,4 +281,14 @@
     <string name="builtin_pairing_done">ペア設定が完了しました。</string>
     <string name="builtin_pairing_failed">ペア設定が完了しませんでした。</string>
     <string name="builtin_manual_body">ワイヤレスデバッグが使えない場合にのみ必要です。端末を接続した状態で 2 行とも実行し、再起動のたびに実行し直してください。</string>
+    <string name="setup_root_title">権限付きアクセス</string>
+    <string name="setup_root_available">Root 利用可能</string>
+    <string name="setup_root_active">Root 動作中</string>
+    <string name="setup_root_available_body">Root を検出しました。HiLight をオンにして、Root 管理アプリからの初回リクエストを許可してください。Shizuku や ADB の設定は不要です。</string>
+    <string name="setup_root_requesting_body">Root 管理アプリでの許可を待っています。</string>
+    <string name="setup_root_starting_body">Root アクセスで HiLight レンダラーを起動しています。</string>
+    <string name="setup_root_active_body">HiLight は Root を直接使用しています。Shizuku や ADB の設定は不要です。</string>
+    <string name="setup_root_error_body">Root を起動できませんでした。再試行するか、別の設定方法を使用できます。</string>
+    <string name="setup_root_retry">Root を再試行</string>
+
 </resources>

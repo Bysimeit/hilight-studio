@@ -326,6 +326,17 @@ Leave Latin as-is: HiLight, Shizuku, ADB, LED, JSON, MessagingStyle, shortcutId,
 | `setup_open_usage_access` | Open usage access | 使用状況へのアクセスを開く |
 | `setup_appearance_title` | Appearance | 外観 |
 | `setup_wallpaper_colours` | Wallpaper colours | 壁紙の色 |
+| `setup_updates_title` | Updates | アップデート |
+| `setup_updates_installed` | Installed %1$s | インストール済み %1$s |
+| `setup_updates_body` | Check GitHub for a newer experimental release. | GitHub で新しい試験版リリースを確認します。 |
+| `setup_updates_check` | Check for updates | アップデートを確認 |
+| `setup_updates_checking` | Checking GitHub… | GitHub を確認中… |
+| `setup_updates_available` | Version %1$s is available. | バージョン %1$s を利用できます。 |
+| `setup_updates_view_release` | View release | リリースを見る |
+| `setup_updates_check_again` | Check again | 再確認 |
+| `setup_updates_current` | You are up to date. | 最新版です。 |
+| `setup_updates_none` | No published releases were found. | 公開済みのリリースが見つかりません。 |
+| `setup_updates_failed` | Could not check for updates. Check your connection and try again. | アップデートを確認できませんでした。接続を確認して、もう一度お試しください。 |
 | `setup_test_title` | End-to-end test | 通し動作テスト |
 | `setup_test_body` | Posts a notification from this app. Add a rule for HiLight Studio first. | このアプリから通知を送信します。先に HiLight Studio のルールを追加してください。 |
 | `setup_test_button` | Post test notification | テスト通知を送信 |

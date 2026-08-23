@@ -19,7 +19,7 @@ Use Android Studio with Android SDK platform 37.0 and JDK 21. Run
 
 ## Reporting bugs
 
-Include the Pixel model, Android build, whether Shizuku or ADB is used, the selected pattern, and
+Include the Pixel model, Android build, whether root, Shizuku, or ADB is used, the selected pattern, and
 steps to reproduce. Remove notification contents and other personal data from logs and screenshots.
 
 By contributing, you agree that your contribution is provided under the MIT License.

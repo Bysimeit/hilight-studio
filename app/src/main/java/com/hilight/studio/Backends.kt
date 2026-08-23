@@ -16,10 +16,11 @@ import rikka.shizuku.Shizuku
 
 /** How the privileged renderer is reached. */
 enum class Transport(@StringRes val labelRes: Int) {
-    /** Prefer Shizuku, fall back to an adb-started helper. */
+    /** Root is automatic; otherwise prefer Shizuku and fall back to an adb-started helper. */
     AUTO(R.string.transport_auto),
     SHIZUKU(R.string.transport_shizuku),
     ADB(R.string.transport_adb),
+    ROOT(R.string.transport_root),
 }
 
 interface Backend {
@@ -33,7 +34,11 @@ class AdbBackend(private val ctx: Context) : Backend {
 
     override fun push(json: String) = Bridge.writeState(ctx, json)
 
-    override fun status(): HelperStatus = Bridge.readStatus(ctx)
+    override fun status(): HelperStatus {
+        val status = Bridge.readStatus(ctx)
+        return if (!status.alive || status.owner == "adb") status
+        else HelperStatus(alive = false, owner = "adb")
+    }
 }
 
 class ShizukuBackend(private val ctx: Context) : Backend {
@@ -185,6 +190,8 @@ class ShizukuBackend(private val ctx: Context) : Backend {
                 alive = true,
                 ageMs = 0,
                 pid = o.optInt("pid", -1),
+                uid = o.optInt("uid", -1),
+                owner = "shizuku",
                 ledCount = o.optInt("ledCount", 0),
                 sessionOpen = o.optBoolean("session", false),
                 mode = o.optString("mode", "-"),
@@ -192,6 +199,10 @@ class ShizukuBackend(private val ctx: Context) : Backend {
                 ambientHeld = o.optBoolean("ambientHeld", false),
                 resting = o.optBoolean("resting", false),
                 dutyPct = o.optInt("dutyPct", 0),
+                appliedStateRevision = o.optLong("appliedStateRevision", 0),
+                privacyObserverEnabled = o.optBoolean("privacyObserverEnabled", false),
+                privacyObserverState = o.optString("privacyObserverState", "stopped"),
+                privacyPhase = o.optString("privacyPhase", "inactive"),
             )
         }.getOrDefault(HelperStatus(alive = false))
     }
