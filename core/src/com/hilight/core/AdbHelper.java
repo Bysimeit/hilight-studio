@@ -80,6 +80,7 @@ public final class AdbHelper {
         try {
             JSONObject status = new JSONObject(engine.status());
             status.put("owner", owner);
+            status.put("apk", System.getProperty("java.class.path", ""));
             byte[] data = status.toString().getBytes(StandardCharsets.UTF_8);
             try (FileOutputStream f = new FileOutputStream(statusFile, false)) {
                 f.write(data);

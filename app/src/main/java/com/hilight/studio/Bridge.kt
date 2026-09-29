@@ -95,6 +95,7 @@ object Bridge {
                 privacyObserverEnabled = o.optBoolean("privacyObserverEnabled", false),
                 privacyObserverState = o.optString("privacyObserverState", "stopped"),
                 privacyPhase = o.optString("privacyPhase", "inactive"),
+                apk = o.optString("apk", ""),
             )
         } catch (t: Throwable) {
             Log.w(TAG, "unreadable status", t)
