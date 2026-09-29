@@ -148,7 +148,17 @@ object AdbAccess {
         }
         failures = 0
         lastAttemptAt = 0
-        if (paired && !alive) ensure(app)
+        if (paired && !rendererCurrent(app)) ensure(app)
+    }
+
+    private fun rendererCurrent(app: Context): Boolean {
+        val status = Bridge.readStatus(app)
+        if (!status.alive) return false
+        if (status.owner != "adb") return true
+        val installed = app.applicationInfo.sourceDir
+        if (status.apk == installed) return true
+        Log.i(TAG, "renderer runs from ${status.apk.ifEmpty { "an unknown APK" }}, installed is $installed")
+        return false
     }
 
     fun localNetworkGranted(ctx: Context): Boolean =
@@ -217,7 +227,7 @@ object AdbAccess {
 
     fun ensure(ctx: Context) {
         val app = ctx.applicationContext
-        if (Bridge.readStatus(app).alive) {
+        if (rendererCurrent(app)) {
             settle(AdbAccessState.READY, null)
             return
         }
@@ -246,7 +256,7 @@ object AdbAccess {
         val app = ctx.applicationContext
         return gate.withLock {
             when {
-                Bridge.readStatus(app).alive -> settle(AdbAccessState.READY, null)
+                rendererCurrent(app) -> settle(AdbAccessState.READY, null)
                 !localNetworkGranted(app) -> settle(AdbAccessState.LOCAL_NETWORK_OFF, null)
                 !wirelessDebuggingEnabled(app) -> settle(AdbAccessState.WIRELESS_OFF, null)
                 !paired(app) -> settle(AdbAccessState.NEEDS_PAIRING, null)
@@ -348,7 +358,7 @@ object AdbAccess {
         var polls = 0
         while (SystemClock.elapsedRealtime() < deadline) {
             polls++
-            if (Bridge.readStatus(app).alive) {
+            if (rendererCurrent(app)) {
                 Log.i(TAG, "renderer reported back after $polls polls")
                 return true
             }

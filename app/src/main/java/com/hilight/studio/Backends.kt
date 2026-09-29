@@ -68,7 +68,7 @@ class ShizukuBackend(private val ctx: Context) : Backend {
         .daemon(true)
         .processNameSuffix("hilight")
         .debuggable(BuildConfig.DEBUG)
-        .version(BuildConfig.VERSION_CODE)
+        .version(ctx.applicationInfo.sourceDir.hashCode())
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {

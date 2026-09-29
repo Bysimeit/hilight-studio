@@ -43,6 +43,7 @@ public final class Engine {
     private String renderedPrivacyRule;
     private PrivacyScheduler.Phase privacyPhase = PrivacyScheduler.Phase.INACTIVE;
     private long appliedStateRevision;
+    private int blankFramesOwed;
 
     private double dim = 1.0;
     private long ambientTimeoutMs = DEFAULT_AMBIENT_TIMEOUT_MS;
@@ -208,8 +209,7 @@ public final class Engine {
                             privacy.phase == PrivacyScheduler.Phase.COOLDOWN);
             if (!enabled && !privacyOwnsOutput) {
                 leavePrivacyRenderer();
-                release("released HiLight to the system");
-                noteDark(now);
+                blankAndRelease(now, "released HiLight to the system");
                 return;
             }
 
@@ -259,12 +259,9 @@ public final class Engine {
                     t = now;
                     break;
                 case BLANK:
-                    leavePrivacyRenderer();
-                    blankAndRelease(now, "nothing left to show — released HiLight to the system");
-                    return;
                 default:
                     leavePrivacyRenderer();
-                    noteDark(now);
+                    blankAndRelease(now, "nothing left to show — released HiLight to the system");
                     return;
             }
 
@@ -274,6 +271,7 @@ public final class Engine {
             }
             int[] frame = renderer.frame(cfg, t, Math.max(1, lights.ledCount()));
             lights.push(protect(frame, now));
+            blankFramesOwed = OutputGate.BLANK_FRAMES;
         }
     }
 
@@ -298,8 +296,10 @@ public final class Engine {
     }
 
     private void blankAndRelease(long now, String why) {
-        if (lights.isSessionOpen()) lights.push(protect(BLANK, now));
-        release(why);
+        if (lights.isSessionOpen()) {
+            lights.push(protect(BLANK, now));
+            if (--blankFramesOwed <= 0) release(why);
+        }
         noteDark(now);
     }
 

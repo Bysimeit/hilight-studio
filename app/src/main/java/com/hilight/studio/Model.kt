@@ -419,6 +419,7 @@ data class HelperStatus(
     val privacyObserverEnabled: Boolean = false,
     val privacyObserverState: String = "stopped",
     val privacyPhase: String = "inactive",
+    val apk: String = "",
 )
 
 const val LED_COUNT = 8
